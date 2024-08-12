@@ -1,0 +1,212 @@
+{
+    // VScode
+    "workbench.colorTheme": "Monokai",
+    "editor.selectionClipboard": false,
+    "explorer.confirmPasteNative": false,
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace', monospace",
+    "editor.fontLigatures": true,
+    "window.titleBarStyle": "custom",
+    "window.customTitleBarVisibility": "auto",
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#80808010"
+    },
+    "editor.rulers": [
+      80,
+      120,
+      120,
+      120
+    ],
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    // R
+    "r.bracketedPaste": true,
+    "r.plot.useHttpgd": true,
+
+    "r.session.levelOfObjectDetail": "Normal",
+    // Rust
+    // Quarto
+    "quarto.render.renderOnSave": true,
+    // Git e Github
+    "github.copilot.enable": {
+      "quarto": true,
+      "*": true
+    },
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    // TO-DO Tree
+    "todo-tree.tree.scanAtStartup": false,
+    "todo-tree.highlights.enabled": false,
+    "todo-tree.general.tags": [
+      "TODO",
+      "todo",
+      "BUG",
+      "FIX",
+      "FIXME",
+      "fix",
+      "fixme",
+      "MARK",
+      "mark"
+    ],
+    "todo-tree.general.tagGroups": {
+      "TODO": [
+        "TODO",
+        "todo"
+      ],
+      "BUG": [
+        "BUG",
+        "FIX",
+        "FIXME",
+        "fix",
+        "fixme"
+      ],
+      "MARK": [
+        "MARK",
+        "mark"
+      ]
+    },
+    "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^)((\\s+(!|\\?|\\*|\\-))?(\\s+\\[ \\])?|(\\s+(!|\\?|\\*)\\s+\\[.\\])?)\\s*($TAGS)\\s*:)",
+    "todo-tree.highlights.customHighlight": {
+      "TODO": {
+        "icon": "checklist"
+      },
+      "BUG": {
+        "icon": "bug"
+      },
+      "MARK": {
+        "icon": "bookmark"
+      }
+    },
+    "todo-tree.tree.labelFormat": "${tag:uppercase} ${after} [${filename}]",
+    "todo-tree.tree.tooltipFormat": "${filename}:[${line}] in ${filepath}",
+    // Better Comments
+    "better-comments.tags": [
+      {
+        "tag": "- [x]",
+        "color": "#6a6758",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "[x]",
+        "color": "#6a6758",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "!",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "?",
+        "color": "#3498DB",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "todo",
+        "color": "#FF8C00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "[ ] todo",
+        "color": "#FF8C00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "- [ ] todo",
+        "color": "#FF8C00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "bug",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "[ ] bug",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "- [ ] bug",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "fix",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "[ ] fix",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "- [ ] fix",
+        "color": "#FF2D00",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      },
+      {
+        "tag": "*",
+        "color": "#98C379",
+        "strikethrough": false,
+        "underline": false,
+        "backgroundColor": "transparent",
+        "bold": false,
+        "italic": false
+      }
+    ],
+    // Others
+  }

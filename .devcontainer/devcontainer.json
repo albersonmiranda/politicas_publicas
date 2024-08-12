@@ -1,0 +1,32 @@
+{
+	"name": "R Data Science Environment",
+	"build": {
+		"dockerfile": "dockerfile",
+		"args": { "VARIANT": "4.4" }
+	},
+
+	// Install Dev Container Features. More info: https://containers.dev/features
+	"features": {
+		// Instalar versão da imagem Rocker com Quarto
+		"ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {},
+		// Instalar JupyterLab and IRkernel
+		"ghcr.io/rocker-org/devcontainer-features/r-rig:1": {
+			"version": "none",
+			"installJupyterlab": true
+		}
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot-chat",
+				"GitHub.copilot",
+				"quarto.quarto",
+				"REditorSupport.r",
+				"aaron-bond.better-comments",
+				"Gruntfuggly.todo-tree",
+				"analytic-signal.preview-pdf"
+			]
+		}
+	}
+}
