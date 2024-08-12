@@ -1,8 +1,7 @@
 {
 	"name": "R Data Science Environment",
 	"build": {
-		"dockerfile": "dockerfile",
-		"args": { "VARIANT": "4.4" }
+		"dockerfile": "dockerfile"
 	},
 
 	// Install Dev Container Features. More info: https://containers.dev/features
