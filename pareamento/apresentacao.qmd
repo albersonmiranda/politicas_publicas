@@ -1,0 +1,75 @@
+---
+title: PROPENSITY SCORE MATCHING
+subtitle: UMA AVALIAÇÃO DE IMPACTO DE UM PROGRAMA DE QUALIFICAÇÃO PROFISSIONAL NA EMPRESA SOBRE A INSERÇÃO DOS JOVENS NO MERCADO DE TRABALHO FORMAL
+author: Alberson Miranda & Maria Delboni
+date: last-modified
+date-format: long
+lang: pt-BR
+format:
+    beamer:
+        include-in-header: beamer/preamble.tex
+        include-after-body: beamer/backmatter.tex
+        number-sections: false
+        output-file: apresentacao.pdf
+bibliography: referencias.bib
+cite-method: biblatex
+link-citations: true
+link-bibliography: true
+---
+
+# Introdução
+
+## Outline
+
+Avaliação de impacto, via pareamento e regressão linear, de um programa de qualificação profissional para jovens em que o treinamento é oferecido por um conjunto de empresas potenciais empregadoras nas dependências da empresa e por seu próprio pessoal.
+
+## Outline
+
+- Target: Renda e empregabilidade dos jovens participantes do programa
+- Contrafactual: participantes do programa Jovem Aprendiz
+  - A escolha do grupo de controle visa reduzir o viés de seleção ao usar um programa que também requer inscrição
+- Impacto positivo na empregabilidade
+- Impacto nulo no curto prazo e negativo no médio prazo para a remuneração
+
+## O Programa
+
+![O Programa](img/programa.excalidraw.png)
+
+## O Programa
+
+- Ação voluntária empresarial
+- Programa de qualificação profissional para jovens de baixa renda cursando ensino médio noturno
+- Empresas de médio e grande porte
+- Aproximar o jovem do mundo corporativo
+
+## O Programa
+
+- Toda a qualificação teórica e prática dentro da empresa por profissionais da empresa
+- Customizado para o contexto da empresa
+- Duração de 1 ano, carga horária de 800 horas + certificado de instituições federais de ensino superior conveniadas com a idealizadora do programa
+
+# Metodologia
+
+## Dados
+
+- Dados administrativos da fundação que administra o programa
+- Dados da Relação Anual de Informações Sociais (RAIS)
+
+## Construção do contrafactual
+
+- Bla bla
+$$
+Y= \beta_1 X_1
+$$
+
+## Pareamento com Escore de Propensão
+
+## Regressão Linear
+
+# Resultados
+
+## Curto Prazo
+
+## Médio Prazo
+
+# Conclusões

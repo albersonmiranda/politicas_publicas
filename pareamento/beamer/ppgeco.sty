@@ -1,0 +1,210 @@
+% Template para apresentações para o PPGEco/UFES com o LaTeX beamer.
+%
+% por Alberson Miranda, albersonmiranda@hotmail.com
+%
+
+\ProvidesPackage{beamerppgeco}[2023/03/07]
+
+\RequirePackage{etoolbox,tikz,listings,graphicx,geometry,caladea,carlito}
+
+% Force 16:9 aspect ratio
+\geometry{paperwidth=16cm,paperheight=9cm}
+
+% Caladea is a Cambria clone, Carlito a Calibri clone
+\renewcommand{\familydefault}{\sfdefault}
+
+% Main colour
+\definecolor{sintefblue}{RGB}{0,52,104}
+
+% Air Force Blue
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\definecolor{morelightgray}{rgb}{0.9, 0.9, 0.9}
+
+% "Warm grey"
+\definecolor{sintefgrey}{RGB/cmyk}{235,235,230/0,0,0,.1}
+\colorlet{sintefgray}{sintefgrey}
+
+% Greens
+\definecolorset{RGB/cmyk}{sintef}{}{lightgreen, 205,250,225/.23, 0,.20, 0;%
+                                    green,       20,185,120/.73, 0,.67, 0;%
+                                    darkgreen,    0, 70, 40/.93,.43,.92,.52}
+
+% Additional colours
+\definecolorset{RGB/cmyk}{sintef}{}{yellow, 200,155,20/20, 36,98, 8;%
+                                    red,    190, 60,55/19, 86,77, 8;%
+                                    lilla,  120,  0,80/48,100,27,31}
+
+% Deprecated colours for backward compatibility
+\definecolorset{HTML}{sintef}{}{cyan,      22A7E5;%
+                                magenta,   EC008C;%
+                                lightgrey, D8D0C7}
+\colorlet{sinteflightgray}{sinteflightgrey}
+
+% No navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+\newcommand{\@footlinepayoff}{\@SINTEFmotto}
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\textwidth,ht=5mm,dp=3mm,rightskip=1cm]{footline}
+  \usebeamerfont{footline}\hfill\@footlinepayoff
+  \end{beamercolorbox}
+}
+
+% Set footline AND coordinate blocks with it
+\newcommand{\footlinecolor}[1]{% if #1 is empty, makes footline transparent
+  \ifstrempty{#1}{%
+    \renewcommand{\@footlinepayoff}{}
+    \setbeamercolor{footline}{bg=}
+    \setbeamercolor{block title}{fg=white,bg=sintefblue}
+    \setbeamercolor{block body}{fg=white,bg=sintefblue}
+  }{
+    \renewcommand{\@footlinepayoff}{\@SINTEFmotto}
+    \setbeamercolor{footline}{fg=white,bg=#1}
+    \setbeamercolor{block title}{fg=white,bg=#1}
+    \setbeamercolor{block body}{fg=white,bg=#1}
+  }%
+}
+\footlinecolor{} % Default: no footline
+
+\pgfdeclareimage[width=0.09\paperwidth]{bluelogo}{beamer/logo-ufes}
+\pgfdeclareimage[width=0.09\paperwidth]{whitelogo}{beamer/logo-ufes-blue}
+\newcommand{\@SINTEFlogo}{bluelogo}
+
+% Set colours
+% NOTE! Beamer colors should be set in the preamble. It often works fine in the
+%       document itself, but NOT for normal text foreground.
+%       \themecolor should only be called from the preamble.
+\newcommand{\themecolor}[1]{
+	\ifstrequal{#1}{blue}{%
+		\setbeamercolor{normal text}{fg=white,bg=sintefblue}
+		\setbeamercolor{structure}{fg=white}
+		\renewcommand{\@SINTEFlogo}{whitelogo}
+		\setbeamercolor{block title}{fg=sintefblue,bg=sintefgrey}
+		\setbeamercolor{block body}{fg=sintefblue,bg=sintefgrey}
+	}{%
+		\setbeamercolor{normal text}{fg=darkgray,bg=white}
+		\setbeamercolor{structure}{fg=sintefblue}
+		\renewcommand{\@SINTEFlogo}{bluelogo}
+		\setbeamercolor{block title}{fg=airforceblue,bg=morelightgray}
+		\setbeamercolor{block body}{fg=darkgray,bg=morelightgray}
+	}
+}
+\themecolor{white} % Default: white theme
+
+\setbeamercolor{title}{fg=sintefblue}
+\setbeamercolor{alerted text}{fg=sintefred}
+\setbeamercolor{author}{fg=black}
+\setbeamercolor{date}{fg=black}
+
+\setbeamerfont{author}{size=\scriptsize}
+\setbeamerfont{date}{size=\tiny}
+\setbeamerfont{title}{series=\bfseries}
+\setbeamerfont{subtitle}{series=\mdseries,size=\footnotesize}
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{framesubtitle}{series=\mdseries}
+\setbeamerfont{footline}{size=\scriptsize}
+\setbeamerfont{block title}{series=\centering, size=\large}
+\setbeamerfont{block body}{size=\normalsize}
+
+% Code to get prettier boxes
+\setbeamertemplate{blocks}[rounded]%, shadow=true]
+
+% Bullets in several levels
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{\textemdash}
+\setbeamertemplate{itemize subsubitem}{\ensuremath{\circ}}
+
+\newenvironment{colorblock}[3][white]{%
+	\begingroup
+	\setbeamercolor{block title}{fg=#1,bg=#2}
+	\setbeamercolor{block body} {fg=#1,bg=#2}
+	\begin{block}{#3}
+	}{%
+	\end{block}
+	\endgroup
+}
+
+% Put the logo in each slide's top left area
+\setbeamertemplate{headline}{\hspace{0.06\textwidth}\pgfuseimage{\@SINTEFlogo}}
+
+% Define frame title and subtitle layout
+\setbeamertemplate{frametitle}{%
+  \vspace*{-3.5ex}
+  \begin{beamercolorbox}[leftskip=2cm]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle\\
+    \usebeamerfont{framesubtitle}\insertframesubtitle
+  \end{beamercolorbox}
+}
+
+% Define the title page
+\setbeamertemplate{title page}{
+  \vskip0pt plus 1filll
+  \hspace{-12mm}% Pull back the box in an inelegant way - but it works!
+  \begin{beamercolorbox}[wd=0.9\textwidth,sep=10pt,leftskip=8mm]{title}
+    {\usebeamerfont{title}\inserttitle}
+
+    {\usebeamerfont{subtitle}\insertsubtitle}
+
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor}
+
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate}
+  \end{beamercolorbox}
+}
+
+\newenvironment{chapter}[3][]{% Args: image (optional), color, frame title
+  \begingroup
+  \themecolor{blue}
+  \setbeamertemplate{footline}{}
+  \ifstrequal{#2}{sinteflightgreen}{ % Use blue text on light green, else white
+    \setbeamercolor{frametitle}{fg=sintefblue}
+    \setbeamercolor{normal text}{fg=sintefblue,bg=#2}
+  }{
+    \setbeamercolor{frametitle}{fg=white}
+    \setbeamercolor{normal text}{fg=white,bg=#2}
+  }
+  \ifstrempty{#1}{}{\setbeamertemplate{background}{\TikzSplitSlide{#1}}}
+  \setbeamertemplate{frametitle}{%
+    \vspace*{8ex}
+    \begin{beamercolorbox}[wd=0.45\textwidth]{frametitle}
+      \usebeamerfont{frametitle}\insertframetitle\\
+      \usebeamerfont{framesubtitle}\insertframesubtitle
+    \end{beamercolorbox}
+  }
+  \begin{frame}{#3}
+  \hspace*{0.05\textwidth}%
+  \minipage{0.35\textwidth}%
+  \usebeamercolor[fg]{normal text}%
+}{%
+  \endminipage
+  \end{frame}
+  \endgroup
+}
+
+\newenvironment{sidepic}[2]{% Args: image, frame title
+  \begingroup
+  \setbeamertemplate{background}{%
+  \hspace*{0.6\paperwidth}%
+  \includegraphics[height=\paperheight]{#1}%
+  }
+  \setbeamertemplate{frametitle}{% Same as normal, but with right skip
+    \vspace*{-3.5ex}
+    \begin{beamercolorbox}[leftskip=2cm,rightskip=0.4\textwidth]{frametitle}%
+      \usebeamerfont{frametitle}\insertframetitle\\
+      \usebeamerfont{framesubtitle}\insertframesubtitle
+    \end{beamercolorbox}
+  }
+  \begin{frame}{#2}
+  \minipage{0.6\textwidth}%
+}{%
+  \endminipage
+  \end{frame}
+  \endgroup
+}
+
+\newcommand{\@SINTEFmotto}{}
+\newcommand{\setmotto}{\renewcommand{\@SINTEFmotto}}
+
+% MY CUSTOMIZATION
+
+\newcommand{\strtoc}{Table of Contents}
+\newcommand{\strsubsec}{Section \thesection.\thesubsection}
