@@ -4,7 +4,6 @@ subtitle: UMA AVALIAÇÃO DE IMPACTO DE UM PROGRAMA DE QUALIFICAÇÃO PROFISSION
 author: Alberson Miranda & Maria Delboni
 date: last-modified
 date-format: long
-lang: pt-BR
 format:
     beamer:
         include-in-header: beamer/preamble.tex
@@ -21,11 +20,11 @@ link-bibliography: true
 
 ## Outline
 
-Avaliação de impacto, via pareamento e regressão linear, de um programa de qualificação profissional para jovens em que o treinamento é oferecido por um conjunto de empresas potenciais empregadoras nas dependências da empresa e por seu próprio pessoal.
+Avaliação de impacto, via pareamento e regressão linear, de um programa de qualificação profissional para jovens em que o treinamento é oferecido por um conjunto de empresas potenciais empregadoras nas dependências da empresa e por seu próprio pessoal [@corseuil_uma_2017].
 
 ## Outline
 
-- Target: Renda e empregabilidade dos jovens participantes do programa
+- Target: Salário e empregabilidade dos jovens participantes do programa
 - Contrafactual: participantes do programa Jovem Aprendiz
   - A escolha do grupo de controle visa reduzir o viés de seleção ao usar um programa que também requer inscrição
 - Impacto positivo na empregabilidade
@@ -44,8 +43,9 @@ Avaliação de impacto, via pareamento e regressão linear, de um programa de qu
 
 ## O Programa
 
+- Empresas participantes e instituição administradora não informadas
 - Toda a qualificação teórica e prática dentro da empresa por profissionais da empresa
-- Customizado para o contexto da empresa
+- Customizado para o contexto da empresa (15% prático, 85% teórico)
 - Duração de 1 ano, carga horária de 800 horas + certificado de instituições federais de ensino superior conveniadas com a idealizadora do programa
 
 # Metodologia
@@ -54,15 +54,38 @@ Avaliação de impacto, via pareamento e regressão linear, de um programa de qu
 
 - Dados administrativos da fundação que administra o programa
 - Dados da Relação Anual de Informações Sociais (RAIS)
+- Período de avaliação: até 3 anos após a conclusão do programa (2006-2012)
+- 5.657 observações
+- Foram removidos cerca de 10% dos participantes do programa por não terem sido encontrados na RAIS
 
-## Construção do contrafactual
+## Contrafactual
 
-- Bla bla
-$$
-Y= \beta_1 X_1
-$$
+- Programa Jovem Aprendiz
+  - Entre 14 e 24 anos
+  - Pode ter contrato temporário com empresa pública (efetivação inviável)
+  - Não obrigatoriamente de baixa renda
+  - Também é intermediada por uma instituição sem fins lucrativos
+  - Programas podem ser 60% práticos e 40% teóricos
+
+## Contrafactual
+
+- Variáveis selecionadas:
+  - Escolaridade
+  - Faixa etária
+  - Experiência prévia
+  - Setor de atividade da empresa onde se qualificou
+  - UF
+  - Ano de conclusão da qualificação
+
+## Objetivo
+
+### Estimar os impactos do programa Q com base no método semiparamétrico de pareamento com escore de propensão e o método paramétrico de regressão linear baseado na decomposição de Oaxaca-Blinder.
 
 ## Pareamento com Escore de Propensão
+
+$$
+\tau = E[Y_i^1 | D_i = 1] - E[Y_i^0 | D_i = 1]
+$$ {#eq-pareamento}
 
 ## Regressão Linear
 
@@ -70,6 +93,20 @@ $$
 
 ## Curto Prazo
 
+![O Programa](img/Tabela5.png){width=70%}
+
 ## Médio Prazo
 
+![O Programa](img/Tabela6.png){width=70%}
+
 # Conclusões
+
+## Conclusão
+
+- Os resultados indicam que o programa avaliado não afeta a empregabilidade formal de seus participantes relativamente aos aprendizes, nem no curto e nem no médio prazo;
+- Observa-se um efeito positivo no que os autores indicam como "qualidade do emprego": jovens treinados pelo programa Q têm mais chance de se empregar em empresas maiores ou que pagam maiores salários do que os jovens treinados pela aprendizagem.
+
+## Comentários
+
+- Embora os participantes do programa consigam entrar em empresas de maior porte, não há impacto na renda no curto prazo e o impacto é negativo no médio prazo
+- Os autores poderiam avaliar os alunos que concluíram a qualificação contra os que não concluíram
