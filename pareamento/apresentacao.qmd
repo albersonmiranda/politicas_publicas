@@ -117,5 +117,5 @@ Hipóteses:
 
 ## Comentários
 
-- Embora os participantes do programa consigam entrar em empresas de maior porte, não há impacto na renda no curto prazo e o impacto é negativo no médio prazo
-- Os autores poderiam avaliar os alunos que concluíram a qualificação contra os que não concluíram
+- Embora os participantes do programa consigam entrar em empresas de maior porte, não há impacto na renda no curto prazo e o impacto é negativo no médio prazo;
+- Os autores poderiam avaliar os alunos que concluíram a qualificação contra os que não concluíram.
