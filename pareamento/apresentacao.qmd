@@ -87,21 +87,30 @@ $$
 \tau = E[Y_i^1 | D_i = 1] - E[Y_i^0 | D_i = 1]
 $$ {#eq-pareamento}
 
-## Regressão Linear
+Hipóteses:
+
+- H1: Independência Condicional - CIA: $$ Y_i^0 ⊥ D_i | X_i $$
+- H2: Condição de Suporte Comum: $$  0 < p(X_i) < 1 $$
+
+## Estimador de Regressão Linear de Oaxaca-Blinder
+
+- Partindo de um modelo de regressão linear: $$ Y_i^0 = X_1 \beta^0 + \epsilon_1^0 $$
+
+- O efeito do programa sobre os tratados pode ser então estimado por: $$ \mu = \mu_1^1 − \mu_0^1 $$
 
 # Resultados
 
 ## Curto Prazo
 
-![O Programa](img/Tabela5.png){width=70%}
+![Resultado CP](img/Tabela5.png){width=70%}
 
 ## Médio Prazo
 
-![O Programa](img/Tabela6.png){width=70%}
+![Resultado MP](img/Tabela6.png){width=70%}
 
 # Conclusões
 
-## Conclusão
+## Conclusões
 
 - Os resultados indicam que o programa avaliado não afeta a empregabilidade formal de seus participantes relativamente aos aprendizes, nem no curto e nem no médio prazo;
 - Observa-se um efeito positivo no que os autores indicam como "qualidade do emprego": jovens treinados pelo programa Q têm mais chance de se empregar em empresas maiores ou que pagam maiores salários do que os jovens treinados pela aprendizagem.
