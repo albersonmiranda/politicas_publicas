@@ -117,5 +117,6 @@ Hipóteses:
 
 ## Comentários
 
+- O programa Jovem Aprendiz não é um contrafactual muito adequado, pois alunos exclusivamente do noturno trazem características diferentes.
 - Embora os participantes do programa consigam entrar em empresas de maior porte, não há impacto na renda no curto prazo e o impacto é negativo no médio prazo;
 - Os autores poderiam avaliar os alunos que concluíram a qualificação contra os que não concluíram.

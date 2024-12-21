@@ -1,0 +1,67 @@
+---
+title: Avaliação de Políticas Públicas
+subtitle: Lista de Exercícios
+author: Alberson da Silva Miranda^[Doutorando PPGEco/UFES.]
+date: last-modified
+date-format: long
+lang: pt-BR
+thanks: Código disponível em https://github.com/albersonmiranda/politicas_publicas.
+toc: true
+number-sections: true
+sansfont: Times New Roman # Liberation Serif
+mainfont: Times New Roman # Liberation Serif
+monofont: Fira Code
+monofontoptions:
+  - Scale=0.8
+highlight-style: zenburn
+code-line-numbers: true
+format:
+  pdf:
+    documentclass: scrreprt
+    header-includes: 
+      - \renewcommand\thesubsection{\alph{subsection}}
+---
+
+# Q1
+
+O banco de dados PIAA_2017-2018.xlsx contém informações desidentificadas sobre notas dos alunos e frequência na monitoria da disciplina Matemática I no departamento de economia nos anos 2017 e 2018. A tabela a seguir lista as variáveis contidas no banco de dados.
+
+| Variável | Descrição |
+|----------|-----------|
+| ID       | Identificação do aluno |
+| Semestre | Semestre no qual a disciplina foi cursada |
+| Nota     | Nota do aluno |
+| Faltas   | Número de faltas na disciplina |
+| Situação | Situação final do aluno na disciplina |
+| Presença | Número de seções de monitoria que o aluno foi |
+| Período  | Número de períodos matriculado |
+| Sexo     | Masculino ou feminino |
+
+## a
+
+Usando o pacote “TableOne” do R, faça um teste de balanceamento da amostra de acordo com uma variável que indica se o aluno foi a mais do que 4 seções de monitoria (tratamento). Faça esse teste sobre as seguintes variáveis: Faltas, Sexo Masculino, variáveis dummies para os semestres e variável dummy para alunos do primeiro período. O que você conclui sobre o balanceamento dos alunos entre tratados e não tratados?
+
+```{r q1.a}
+# pacotes
+library(tableone)
+
+# carregar dados
+dados <- readxl::read_excel("lista/data/PIAA_2017-2018.xlsx") |> janitor::clean_names()
+
+# feature engineering
+dados <- within(dados, {
+  tratamento <- ifelse(presenca > 4, 1, 0)
+  semestre <- as.factor(semestre)
+  periodo <- as.factor(periodo)
+  sexo <- as.factor(sexo)
+  primeiro_periodo <- as.factor(ifelse(periodo == 1, 1, 0))
+})
+
+# tabela
+tableone <- CreateTableOne(
+  vars = c("faltas", "sexo", "semestre", "primeiro_periodo"),
+  strata = "tratamento",
+  data = dados
+)
+print(tableone)
+```
