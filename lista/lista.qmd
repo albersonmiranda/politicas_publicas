@@ -1,16 +1,16 @@
 ---
 title: Avaliação de Políticas Públicas
 subtitle: Lista de Exercícios
-author: Alberson da Silva Miranda^[Doutorando PPGEco/UFES.]
+author: Alberson da Silva Miranda^[Discente PPGEco/UFES.]
 date: last-modified
 date-format: long
 lang: pt-BR
 thanks: Código disponível em https://github.com/albersonmiranda/politicas_publicas.
 toc: true
+toc-title: SUMÁRIO
 number-sections: true
 sansfont: Times New Roman # Liberation Serif
 mainfont: Times New Roman # Liberation Serif
-monofont: Fira Code
 monofontoptions:
   - Scale=0.8
 highlight-style: zenburn
@@ -20,6 +20,7 @@ format:
     documentclass: scrreprt
     header-includes: 
       - \renewcommand\thesubsection{\alph{subsection}}
+      - \usepackage{csquotes}
 ---
 
 # Q1
@@ -39,14 +40,23 @@ O banco de dados PIAA_2017-2018.xlsx contém informações desidentificadas sobr
 
 ## a
 
+\begin{displayquote}
 Usando o pacote “TableOne” do R, faça um teste de balanceamento da amostra de acordo com uma variável que indica se o aluno foi a mais do que 4 seções de monitoria (tratamento). Faça esse teste sobre as seguintes variáveis: Faltas, Sexo Masculino, variáveis dummies para os semestres e variável dummy para alunos do primeiro período. O que você conclui sobre o balanceamento dos alunos entre tratados e não tratados?
+\end{displayquote}
+
+Em relação às faltas, a amostra está desbalanceada. A média de faltas dos alunos que frequentaram mais de 4 seções de monitoria é de 3,82, enquanto a média dos que frequentaram menos de 4 seções é de 17,11 faltas. Formalmente, no teste de diferença de médias, com um p-valor menor que 0.001, podemos rejeitar a hipótese nula de que as médias são iguais (sendo a diferença apenas por uma questão de aleatoriedade amostral).
+
+Em relação ao sexo, sob a hipótese nula de proporções iguais, com p-valor de 0.511, o teste indica que a amostra está balanceada. A proporção de homens (sexo = Masculino) é de 68,9% entre os que não frequentaram mais de 4 seções de monitoria e de 62,2% entre os que frequentaram.
+
+
 
 ```{r q1.a}
 # pacotes
 library(tableone)
 
 # carregar dados
-dados <- readxl::read_excel("lista/data/PIAA_2017-2018.xlsx") |> janitor::clean_names()
+dados <- readxl::read_excel("lista/data/PIAA_2017-2018.xlsx") |>
+  janitor::clean_names()
 
 # feature engineering
 dados <- within(dados, {
@@ -63,5 +73,5 @@ tableone <- CreateTableOne(
   strata = "tratamento",
   data = dados
 )
-print(tableone)
+print(tableone, nonnormal = "faltas")
 ```
