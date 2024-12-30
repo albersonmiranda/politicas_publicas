@@ -12,14 +12,13 @@ sansfont: Times New Roman
 monofont: Fira Code
 monofontoptions: 
   - Scale=0.7
-
 highlight-style: zenburn
 code-line-numbers: true
 format:
- pdf:
-  documentclass: scrreprt
-  header-includes: 
-    - \usepackage{csquotes}
+  pdf:
+    documentclass: scrreprt
+    header-includes: 
+      - \usepackage{csquotes}
 ---
 
 ```{r config}
@@ -27,9 +26,9 @@ format:
 
 # configurações
 knitr::opts_chunk$set(
-  echo = TRUE,
-  warning = FALSE,
-  message = FALSE
+ echo = TRUE,
+ warning = FALSE,
+ message = FALSE
 )
 ```
 
@@ -39,14 +38,14 @@ O banco de dados PIAA_2017-2018.xlsx contém informações desidentificadas sobr
 
 | Variável | Descrição |
 |----------|-----------|
-| ID  | Identificação do aluno |
+| ID | Identificação do aluno |
 | Semestre | Semestre no qual a disciplina foi cursada |
-| Nota  | Nota do aluno |
+| Nota | Nota do aluno |
 | Faltas | Número de faltas na disciplina |
 | Situação | Situação final do aluno na disciplina |
 | Presença | Número de seções de monitoria que o aluno foi |
 | Período | Número de períodos matriculado |
-| Sexo  | Masculino ou feminino |
+| Sexo | Masculino ou feminino |
 
 ## a
 
@@ -642,10 +641,10 @@ m4 <- plm(
 
 # sumário
 stargazer::stargazer(
- m3,
- m4,
- title = "Regressões em painel",
- header = FALSE
+  m3,
+  m4,
+  title = "Regressões em painel",
+  header = FALSE
 )
 ```
 
@@ -818,14 +817,14 @@ m6 <- plm(
 
 # sumário
 stargazer::stargazer(
- m5,
- m6,
- title = "Regressões em painel",
- header = FALSE
+  m5,
+  m6,
+  title = "Regressões em painel",
+  header = FALSE
 )
 ```
 
-## h.
+## h
 
 \begin{displayquote}
 Baseado na sua análise, que conclusões você tiraria a respeito dos efeitos das leis de armas ocultas sobre as taxas de criminalidade? Use uma linguagem clara e acessível, de maneira que até o deputado Marcel Van Hatten (Novo/RS) entenda.
@@ -836,3 +835,400 @@ Eu tenho alguma experiência adestrando cachorros, mas asnos não são minha esp
 Não existem evidências para se afirmar que as "shall issue law" têm qualquer efeito sobre crimes violentos, roubos e assassinatos. A análise estatística não encontrou efeitos causais entre a promulgação dessas leis e a criminalidade. Como podemos ver na @fig-relativo, em alguns estados a incidência de crimes violentos diminuiu e em outros aumentou. Isso quer dizer que existe uma grande variabilidade nos resultados, e a verdadeira causa dessas variações não foi capturada na análise. Se houvesse efeito causal das leis de armas ocultas, esperaríamos que a criminalidade diminuísse de forma consistente após a implementação dessas leis em todos os estados, o que não foi observado. Portanto, não podemos afirmar que as "shall issue laws" têm qualquer efeito sobre a criminalidade.
 
 Além disso, a @fig-absoluto mostra que a tendência de crimes violentos entre os estados que nunca implementaram as leis de armas ocultas é a mesma que a dos estados que implementaram após a implementação. Isso também reforça a ideia de que a implementação das leis de armas ocultas não teve efeito sobre a criminalidade.
+
+# Q4
+
+Para essa questão, use o banco de dados CARD.xlsx. Uma descrição detalhada dos dados está contida no arquivo CARD_Description.pdf. Card (1995) estimou o retorno da educação para homens jovens no ano de 1976 usando como instrumento para educação uma variável dummy indicando se a pessoa havia crescido próximo a uma faculdade com cursos de graduação de 4 anos. Nessa questão você vai repetir alguns passos da análise e realizar algumas extensões.
+
+```{r q4}
+dados <- readxl::read_excel("lista/data/CARD.xlsx")
+```
+
+## a
+
+\begin{displayquote}
+Quais as condições que a proximidade de uma faculdade com cursos de graduação de 4 anos deve satisfazer para ser um instrumento válido para educação? Qual dessas condições pode ser testada empiricamente e qual o procedimento para isso?
+\end{displayquote}
+
+A proximidade de uma faculdade com cursos de graduação de 4 anos deve satisfazer as seguintes condições para ser um instrumento válido para educação:
+
+1. Relevância: A proximidade da faculdade deve estar associada à educação do indivíduo.
+2. Exogeneidade: A proximidade da faculdade não deve estar associada a características não observadas que afetam o rendimento do indivíduo (não pode estar correlacionada com o termo do erro).
+3. Exclusão: A proximidade da faculdade não deve afetar o rendimento do indivíduo diretamente, mas apenas por meio da educação.
+
+A condição de relevância pode ser testada empiricamente verificando se a proximidade da faculdade está associada à educação do indivíduo. A condição de exclusão pode ser testada empiricamente verificando se a proximidade da faculdade afeta o rendimento do indivíduo diretamente.
+
+O procedimento para testar a relevância é estimar a equação de educação com a variável de proximidade da faculdade como variável explicativa. Se o coeficiente for significativo, a variável é relevante. Para testar a exclusão, deve-se estimar a equação de rendimento com a variável de proximidade da faculdade como variável explicativa. Se o coeficiente não for significativo, a variável é válida.
+
+## b
+
+\begin{displayquote}
+Estime equações para o efeito da educação sobre o logaritmo dos rendimentos usando MQO e incluindo as variáveis: educ, exper, expersq, black, south e smsa. A seguir, adicione ao primeiro modelo as variáveis indicadoras das regiões (reg661 – reg668)e smsa66. Em terceiro lugar, adicione ao segundo modelo as variáveis fatheduce motheduc. Por fim, adicione ao terceiro modelo as variáveis momdad14 e sinmon14.  Organize  os  quatro  modelos  em  uma  tabela  exibindo  apenas  os coeficientes das variáveis do primeiro modelo  e indicando as variáveis incluídas nos demais modelos. Interprete os resultados obtidos para a variável educ, mostrando o que significa  essa  magnitude e o quão  diferente são as estimativas nas diferentes especificações.
+\end{displayquote}
+
+O coeficiente de `educ` é significativo em todos os modelos (0.074, 0.075, 0.074 e 0.073), indicando que um ano a mais de educação aumenta o salário em média 7,7% ($e^0.074$). Os coeficientes são muitos próximos entre si, indicando que a inclusão de variáveis adicionais não afetou a estimativa de `educ`.
+
+```{r q4.b}
+#| results: asis
+
+# modelo 1
+m1 <- lm(lwage ~ educ + exper + expersq + black + south + smsa, data = dados)
+
+# modelo 2
+m2 <- lm(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 +reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66,
+  data = dados
+)
+
+# modelo 3
+m3 <- lm(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc,
+  data = dados
+)
+
+# modelo 4
+m4 <- lm(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc + momdad14 + sinmom14,
+  data = dados
+)
+
+# sumário
+stargazer::stargazer(
+  m1,
+  m2,
+  m3,
+  m4,
+  title = "Regressões",
+  header = FALSE,
+  font.size = "scriptsize",
+  single.row = TRUE,
+  column.sep.width = "1pt"
+)
+```
+
+## c
+
+\begin{displayquote}
+Qual crítica pode ser feita em relação às estimativas para o efeito da educação estimado na equação b? Essa estimativa será viesada? Se for, em que direção deve ocorrer esse viés?
+\end{displayquote}
+
+A crítica que pode ser feita é que a variável `educ` pode ser endógena, ou seja, correlacionada com o termo do erro. Isso ocorre porque a educação pode ser afetada por características não observadas que afetam o rendimento do indivíduo. Por exemplo, habilidade. Indivíduos mais talentosos ou motivados podem investir mais em educação e, ao mesmo tempo, obter maiores salários. Além disso, podem existir variáveis confundidoras que afetam tanto a educação quanto o salário (como estrutura familiar).
+
+Outro problema é direção da causalidade: salários mais altos podem permitir que indivíduos invistam mais em educação.
+
+Se a educação for positivamente correlacionada com o termo do erro, a estimativa de MQO será viesada para cima, ou seja, o efeito da educação sobre o salário será superestimado.
+
+## d
+
+\begin{displayquote}
+Para cada modelo estimado na letra b, estime o modelo correspondente à forma reduzida. Organize os quatro modelos em uma tabela exibindo apenas os coeficientes das variáveis do primeiro modelo e indicando as variáveis incluídas nos demais modelos. Qual variável dos modelos da letra b foi substituída? Interprete os resultados obtidos para essa variável incluída, mostrando o que significa essa magnitude e o quão diferente são as estimativas nas diferentes especificações.
+\end{displayquote}
+
+A variável `educ` foi substituída pela variável `nearc4` nos modelos da forma reduzida. O coeficiente de `nearc4` é significativo em dois dos modelos, indicando que a proximidade de uma faculdade de 4 anos pode aumentar o salário. A inclusão de variáveis adicionais afeta a estimativa de `nearc4`, sendo significativa nos modelos com menos covariáveis.
+
+Obs.: a quantidade reduzida de observações nos modelos 3 e 4 pode ter afetado a detecção do efeito.
+
+```{r q4.d}
+#| results: asis
+#| label: tab-q4.d
+#| tbl-cap: Coeficientes da forma reduzida
+
+# modelo 1
+m1_reduzido <- lm(lwage ~ nearc4, data = dados)
+
+# modelo 2
+m2_reduzido <- lm(
+  lwage ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 + reg666 +
+  reg667 + reg668 + smsa66,
+  data = dados
+)
+
+# modelo 3
+m3_reduzido <- lm(
+  lwage ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 + reg666 +
+  reg667 + reg668 + smsa66 + fatheduc + motheduc,
+  data = dados
+)
+
+# modelo 4
+m4_reduzido <- lm(
+  lwage ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 + reg666 +
+  reg667 + reg668 + smsa66 + fatheduc + motheduc + momdad14 + sinmom14,
+  data = dados
+)
+
+# sumário
+stargazer::stargazer(
+  m1_reduzido,
+  m2_reduzido,
+  m3_reduzido,
+  m4_reduzido,
+  header = FALSE,
+  font.size = "scriptsize",
+  single.row = TRUE,
+  column.sep.width = "1pt"
+)
+```
+
+## e
+
+\begin{displayquote}
+Para cada modelo estimado na letra b, estime o modelo correspondente ao primeiro estágio. Organize os quatro modelos em uma tabela exibindo apenas os coeficientes das variáveis do primeiro modelo e indicando as variáveis incluídas nos demais modelos. Quais variáveis dos modelos da letra b foram substituídas? Interprete os resultados obtidos para essa variável incluída, mostrando o que significa essa magnitude e o quão diferente são as estimativas nas diferentes especificações.
+\end{displayquote}
+
+A variável `lwage` foi substituída pela variável `educ` como variável dependente e esta foi removida como covariável. O coeficiente de `nearc4` é significativo em todos os modelos, indicando que a proximidade de uma faculdade de 4 anos aumenta a educação. Portanto, `nearc4` é relevante para `educ` e pode ser um instrumento adequado se a hipótese de exclusão não for violada. A inclusão de variáveis adicionais afeta a estimativa de `nearc4`, reduzindo seu coeficiente e aumentando seu desvio-padrão.
+
+```{r q4.e}
+#| results: asis
+#| label: tab-q4.e
+#| tbl-cap: Coeficientes do primeiro estágio
+
+# modelo 1
+m1_estagio1 <- lm(
+  educ ~ nearc4 + exper + expersq + black + south + smsa,
+  data = dados
+)
+
+# modelo 2
+m2_estagio1 <- lm(
+  educ ~ nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66,
+  data = dados
+)
+
+# modelo 3
+m3_estagio1 <- lm(
+  educ ~ nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc,
+  data = dados
+)
+
+# modelo 4
+m4_estagio1 <- lm(
+  educ ~ nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc + momdad14 + sinmom14,
+  data = dados
+)
+
+# sumário
+stargazer::stargazer(
+  m1_estagio1,
+  m2_estagio1,
+  m3_estagio1,
+  m4_estagio1,
+  header = FALSE,
+  font.size = "scriptsize",
+  single.row = TRUE,
+  column.sep.width = "1pt"
+)
+```
+
+## f
+
+\begin{displayquote}
+Para cada modelo estimado na letra b, estime agora usando a variável nearc4 como instrumento para educação. Organize os quatro modelos em uma tabela exibindo apenas os coeficientes das variáveis do primeiro modelo e indicando as variáveis incluídas nos demais modelos. Interprete os resultados obtidos para a variável educ, mostrando o que significa  essa  magnitude e o quão  diferente são as  estimativas nas diferentes especificações. Compare essas estimativas às obtidas na letra b, comentando se a diferença obtida é consistente com a sua resposta na letra c.
+\end{displayquote}
+
+A variável `educ` é significativa apenas nos dois primeiros modelos, diferentemente dos modelos da letra b em que `educ` foi significativo em todos os modelos. Considerando que há centenas de linhas de dados faltantes em relação à educação dos pais, os modelos 3 e 4 contam com quase 800 observações a menos, sendo mais difícil detectar um efeito. Além disso, a maioria das variáveis incluídas nos modelos 3 e 4 não são significativas, resultando na adição de ruído trazido por essas covariáveis.
+
+```{r q4.f}
+#| results: asis
+#| label: tab-q4.f
+#| tbl-cap: Coeficientes com nearc4 como instrumento
+
+# pacote
+library(AER)
+
+# modelo 1
+m1_iv <- ivreg(
+  lwage ~ educ + exper + expersq + black + south + smsa |
+  nearc4 + exper + expersq + black + south + smsa,
+  data = dados
+)
+
+# modelo 2
+m2_iv <- ivreg(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 |
+  nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66,
+  data = dados
+)
+
+# modelo 3
+m3_iv <- ivreg(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc |
+  nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc,
+  data = dados
+)
+
+# modelo 4
+m4_iv <- ivreg(
+  lwage ~ educ + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc + momdad14 + sinmom14 |
+  nearc4 + exper + expersq + black + south + smsa + reg661 + reg662 +
+  reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + smsa66 + fatheduc +
+  motheduc + momdad14 + sinmom14,
+  data = dados
+)
+
+# sumário
+stargazer::stargazer(
+  m1_iv,
+  m2_iv,
+  m3_iv,
+  m4_iv,
+  header = FALSE,
+  font.size = "scriptsize",
+  single.row = TRUE,
+  column.sep.width = "1pt"
+)
+```
+
+## g
+
+\begin{displayquote}
+Aponte e discuta brevemente ao menos duas razões pelas quais a hipótese de exclusão da proximidade de uma faculdade de 4 anos da equação de salários pode ser violada
+\end{displayquote}
+
+A faculdade pode estar localizada em região com melhores empregos e maior renda, de forma que a localidade seja uma variável confundidora, afetando tanto `educ` quanto `lwage`. Além isso, região com uma universidade presente pode estar associado a uma cultura educacional mais forte, com uma população que valoriza mais a educação.
+
+## h
+
+\begin{displayquote}
+Faça uma regressão da variável `IQ` contra a variável `nearc4` para verificar se existe correlação entre o coeficiente de `QI` da pessoa com a proximidade de uma faculdade. O que você verifica? O que isso significa para a hipótese de exclusão do instrumento `nearc4`?
+\end{displayquote}
+
+O coeficiente de `nearc4` é significativo, indicando que a proximidade de uma faculdade de 4 anos está associada ao QI da pessoa. Isso sugere que a hipótese de exclusão do instrumento `nearc4` é violada, uma vez que o instrumento `nearc4` está afetando `lwage` não só através apenas de `educ`, mas também a partir de `IQ`.
+
+```{r q4.h}
+#| results: asis
+#| label: tab-q4.h
+#| tbl-cap: Regressão de IQ contra nearc4
+
+# modelo
+m_iq <- lm(IQ ~ nearc4, data = dados)
+
+# sumário
+stargazer::stargazer(
+  m_iq,
+  header = FALSE
+)
+```
+
+## i
+
+\begin{displayquote}
+Inclua no modelo da letra h as variáveis regionais (smas66 e reg661 – reg668). QI e nearc4 apresentam correlação nessa especificação? Tendo em vista esse achado, o que você conclui sobre a importância de incluir as variáveis regionais de 1966 na equação para o logaritmo do salário?
+\end{displayquote}
+
+A inclusão das variáveis regionais torna `nearc4` não significativo, indicando que a correlação entre `IQ` e `nearc4` pode ser explicada por essas variáveis. Isso sugere que a inclusão de variáveis regionais é importante para controlar o efeito da região sobre o QI e o salário, e suportando `nearc4` como um instrumento válido.
+
+```{r q4.i}
+#| results: asis
+#| label: tab-q4.i
+#| tbl-cap: Regressão de IQ contra nearc4 com variáveis regionais
+
+# modelo
+m_iq_regional <- lm(IQ ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 +
+  reg666 + reg667 + reg668 + smsa66, data = dados)
+
+# sumário
+stargazer::stargazer(
+  m_iq_regional,
+  header = FALSE,
+  single.row = TRUE
+)
+```
+
+# Q5
+
+Esta questão é motivada pelo artigo "The Persistent Effects of Peru's Mining Mita" de Melissa Dell (2010). A autora busca compreender os efeitos persistentes da Mita, um sistema extrativista de trabalho forçado implementado pelo império espanhol no Peru e na Bolívia. Dell avalia se essa instituição, que foi encerrada há duzentos anos, ainda tem efeitos sobre o consumo e a renda das famílias nos dias de hoje. O artigo está disponível no link; familiarize-se com ele antes de começar. Você precisará usaro arquivo mitaData.csv para realizar o exercício a seguir.
+
+## a
+
+Dell utiliza um design de regressão descontínua para comparar os resultados entre pessoas que vivem em distritos que participaram da antiga Mita e aquelas que vivem em distritos que não participaram. Discuta brevemente a estratégia de identificação do efeito causal ressaltando:
+
+### i
+
+Por que a comparação dos distritos que tiveram o sistema de Mita com os que não tiveram é inadequada?
+
+### ii
+
+Qual a hipótese de identificação usada pela autora?
+
+### iii
+
+Qual a equação estimada e qual variável corresponde a estratégia usada pela autora?
+
+## b
+
+Agora vamos reproduzir o resultado principal de Dell. Dadas as variáveis de longitude e latitude $x$ e $y$, construa $x^2$, $y^2$, $xy$, $x^3$, $y^3$, $x^2y$ e $xy^2$.Faça uma regressão do logaritmo do consumo equivalente dos domicílios (2001) (`lhhequiv`) em relação à variável `Mita` (pothuan_mita), todos os termos polinomiais, elevação (elv_sh), inclinação média (mean_slope), número de bebês (infants), crianças (children), adultos (adults) e efeitos fixos dos segmentos de fronteira (fe4_1, bfe4_2, bfe4_3). Agrupe os erros padrão por distrito. Execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
+
+## c
+
+Execute as mesmas regressões de antes, mas, em vez de termos polinomiais em longitude e latitude, utilize um polinômio cúbico na distância até Potosí (dpot). Ou seja, inclua a primeira, a segunda e a terceira potência dessa variável nas regressões. Novamente, agrupe os erros padrão por distrito e execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
+
+# Q6
+
+Essa questão replica a análise contida no artigo “Evaluating the Effect of Homicide Prevention Strategies in São Paulo, Brazil: A Synthetic Control Approach”de Danilo Freire (2010). O autor busca mensurar o efeito causal agregado de políticas públicas sobre as taxas de homicídios em São Paulo. O artigo está disponível no link; familiarize-se com ele antes de começar. Você precisará usar o arquivo df.Rdata para realizar o exercício a seguir. Descrição da base: O painel de dados contém informações de 1990 a 2009, para os 26 estados e o Distrito Federal. Os seguintes estados constam na base, mas não são utilizados na análise: Bahia e Sergipe.
+
+- Formato: dataframe - painel.
+- 1 unidade tratada: nome do estado: São Paulo.
+- 24 regiões de controle.
+- 20 anos (1990:2009).
+- Identificadores:
+  - abbreviation: sigla do estado
+  - code: código do estado
+  - state: nome do estado
+  - year: ano
+- Variável dependente:homicide.rates (número de homicídios por 100.000 habitantes)
+- Preditores: 1990:1998:
+  - homicide.rates: taxa de homicídios (número de homicídios por 100.000 habitantes);
+  - state.gdp.capita: PIB per capita estadual (em reais de 2010);
+  - state.gdp.growth.percent: crescimento do PIB estadual (percentual, em reais de 2010);
+  - population.projection.ln: logaritmo natural da população (projeções anuais da população do estado);
+  - proportion.extreme.poverty: população vivendo em extrema pobreza (percentual da população do estado que nãoatinge a ingestão mínima de 2.000 calorias por dia);
+  - years.schooling.imp: anos de escolaridade (número  médio  de  anos  de  instrução formal em estabelecimentos de ensino-homens e mulheres com 25 anos ou mais). As observações ausentes foram imputadas com interpolação linear;
+  - gini.imp: índice de Gini (medida de desigualdade que varia de 0 a 1, onde 0 é o mais igual e 1 o mais desigual). As observações ausentes foram imputadas com interpolação linear.
+- Para organizar os dados, use os seguintes parâmetros na função dataprep():
+  - predictors.op = "mean";
+  - time.predictors.prior = c(1990:1998);
+  - time.optimize.ssr = c(1990:1998);
+  - time.plot = c(1990:2009);
+
+## a
+
+Discuta brevemente a estratégia de identificação empregada pelo autor ressaltando suas vantagens em relação a estudos de caso comparativos qualitativos. Indique também uma crítica a abordagem seguida pelo autor.
+
+## b
+
+Obtenha os pesos para as covariadas (preditores) e para os estados doadores para construção do São Paulo sintético. Organize os resultados como na tabela 1 do artigo.
+
+## c
+
+Elabore uma tabela que compara os valores dos preditores pré-tratamento para a unidade tratada, a unidade sintética de controle e todas as unidades na amostra (Tabela 2, no artigo). Comente sobre a semelhança entre SP real e seu controle em cada uma das dimensões.
+
+## d
+
+Elabore dois gráficos ilustrativos dos resultados: um mostrando a evolução da trajetória da taxa de homicídios em SP e em seu controle (figura 2 do artigo) e outro mostrando o gap entre a taxa de homicídios em SP e seu controle (figura 3 do artigo) e comente brevemente os resultados.
+
+## e
+
+Escolha o estado não tratado com maior peso no controle sintético e faça um teste de placebo tentando encontrar algum  efeito da política sobre esse estado.  Comente seu resultado ressaltando sua implicação para a análise.
+
+## f
+
+Aumente essa análise para todos os demais estados e coloque os resultados em um gráfico ilustrativo (figura 6 do artigo) fazendo o teste de permutação sugerido por Abadie Diamond e Hainmueller (2010). Comente brevemente os resultados.
