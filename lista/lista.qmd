@@ -8,20 +8,30 @@ lang: pt-BR
 thanks: Código disponível em https://github.com/albersonmiranda/politicas_publicas.
 toc: true
 toc-title: SUMÁRIO
-number-sections: true
-sansfont: Times New Roman # Liberation Serif
-mainfont: Times New Roman # Liberation Serif
-monofontoptions:
-  - Scale=0.8
+sansfont: Times New Roman
+monofont: Fira Code
+monofontoptions: 
+  - Scale=0.7
+
 highlight-style: zenburn
 code-line-numbers: true
 format:
-  pdf:
-    documentclass: scrreprt
-    header-includes: 
-      - \renewcommand\thesubsection{\alph{subsection}}
-      - \usepackage{csquotes}
+ pdf:
+  documentclass: scrreprt
+  header-includes: 
+    - \usepackage{csquotes}
 ---
+
+```{r config}
+#| include = FALSE
+
+# configurações
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
 
 # Q1
 
@@ -29,14 +39,14 @@ O banco de dados PIAA_2017-2018.xlsx contém informações desidentificadas sobr
 
 | Variável | Descrição |
 |----------|-----------|
-| ID       | Identificação do aluno |
+| ID  | Identificação do aluno |
 | Semestre | Semestre no qual a disciplina foi cursada |
-| Nota     | Nota do aluno |
-| Faltas   | Número de faltas na disciplina |
+| Nota  | Nota do aluno |
+| Faltas | Número de faltas na disciplina |
 | Situação | Situação final do aluno na disciplina |
 | Presença | Número de seções de monitoria que o aluno foi |
-| Período  | Número de períodos matriculado |
-| Sexo     | Masculino ou feminino |
+| Período | Número de períodos matriculado |
+| Sexo  | Masculino ou feminino |
 
 ## a
 
@@ -48,7 +58,7 @@ Em relação às faltas, a amostra está desbalanceada. A média de faltas dos a
 
 Em relação ao sexo, sob a hipótese nula de proporções iguais, com p-valor de 0.511, o teste indica que a amostra está balanceada. A proporção de homens (sexo = Masculino) é de 68,9% entre os que não frequentaram mais de 4 seções de monitoria e de 62,2% entre os que frequentaram.
 
-
+Em relação ao semestre no qual a disciplina foi cursada, a amostra está desbalanceada (provavelmente, o semestre 20172 está puxando esse resultado). Para alunos do primeiro período, também está desbalanceada, com 100% dos alunos dentre os tratados no primeiro período.
 
 ```{r q1.a}
 # pacotes
@@ -56,22 +66,773 @@ library(tableone)
 
 # carregar dados
 dados <- readxl::read_excel("lista/data/PIAA_2017-2018.xlsx") |>
-  janitor::clean_names()
+ janitor::clean_names()
 
 # feature engineering
 dados <- within(dados, {
-  tratamento <- ifelse(presenca > 4, 1, 0)
-  semestre <- as.factor(semestre)
-  periodo <- as.factor(periodo)
-  sexo <- as.factor(sexo)
-  primeiro_periodo <- as.factor(ifelse(periodo == 1, 1, 0))
+ tratamento <- ifelse(presenca > 4, 1, 0)
+ semestre <- as.factor(semestre)
+ periodo <- as.factor(periodo)
+ sexo <- as.factor(sexo)
+ primeiro_periodo <- as.factor(ifelse(periodo == 1, 1, 0))
 })
 
 # tabela
 tableone <- CreateTableOne(
-  vars = c("faltas", "sexo", "semestre", "primeiro_periodo"),
-  strata = "tratamento",
+ vars = c("faltas", "sexo", "semestre", "primeiro_periodo"),
+ strata = "tratamento",
+ data = dados
+)
+print(tableone)
+```
+
+## b
+
+\begin{displayquote}
+Faça uma regressão da nota dos alunos contra uma variável indicativa de que o aluno foi a mais do que 4 seções de monitoria (tratamento). Interprete o resultado. O que seria necessário para que esse resultado possa ser interpretado como um efeito causal? Essas condições são válidas para esses dados? Por quê? Em seguida, repita essa regressão adicionando ao modelo as variáveis Faltas, variável dummy para Sexo Masculino, variáveis dummies para o semestre no qual a disciplina foi cursada e variável dummy para alunos do primeiro período. O que acontece com o valor do coeficiente da presença na monitoria em relação ao modelo do item “a”? Essa estimativa seria mais próxima de um efeito causal? Por quê? Para as regressões, use os desvios padrões robustos a heterocedasticidade.
+\end{displayquote}
+
+Para o primeiro modelo, a regressão é conjuntamente significativa, com $R^2$ de 13,9% e coeficientes individualmente significativos. A nota média é de 2 para os alunos que não frequentaram mais de 4 seções de monitoria e de $2+2.6$ para os alunos que frequentaram. O coeficiente de 2.6 para a *dummy* de tratamento indica que, em média, os alunos que frequentaram mais de 4 seções de monitoria tiveram nota 2.6 pontos maior que os que não frequentaram.
+
+Para que o resultado possa ser interpretado como um efeito causal, é necessário que o grupo de controle seja um contrafactual válido. Ou seja, que os alunos que frequentaram mais de 4 seções de monitoria sejam comparáveis aos que não frequentaram, exceto pelo tratamento. No entanto, como verificado em (a), a amostra está desbalanceada em relação às faltas, ao semestre e ao primeiro período. Portanto, o resultado não pode ser interpretado como um efeito causal. Além disso, isso resolveria apenas as questões em relação ao observáveis, não cobrindo possíveis variáveis não observadas, incorrendo em viés de seleção.
+
+```{r q1.b}
+#| results: asis
+# modelos
+m1 <- lm(nota ~ tratamento, data = dados)
+m2 <- lm(
+ nota ~ tratamento + faltas + sexo + semestre + primeiro_periodo,
+ data = dados
+)
+
+# matriz de covariância corrigida
+cov_m1 <- sandwich::vcovHC(m1, type = "HC")
+cov_m2 <- sandwich::vcovHC(m2, type = "HC")
+
+# erros padrões robustos
+robust_se_m1 <- sqrt(diag(cov_m1))
+robust_se_m2 <- sqrt(diag(cov_m2))
+
+# sumário
+stargazer::stargazer(
+ m1,
+ m2,
+ single.row = TRUE,
+ se = list(robust_se_m1, robust_se_m2),
+ title = "Comparação de modelos",
+ header = FALSE
+)
+```
+
+Com todas as variáveis, o segundo modelo resulta num coeficiente bem menor para a variável de tratamento, de 1.27. Isso indica que, controlando para as demais variáveis, o efeito da presença na monitoria é menor. Isso melhora o modelo em relação aos observáveis, porém não resolve o problema do desbalanceamento e nem em relação aos não observáveis e viés de seleção.
+
+## c
+
+\begin{displayquote}
+Usando o pacote “MatchIt”, faça o pareamento dos tratados e controles usando os seguintes critérios: pareamento exato, vizinho mais próximo por distância de Mahalanobis e vizinho mais próximo por escore de propensão usando o modelo logit.Para cada um deles, verifique o balanceamento entre tratados e controles e verifique se o pareamento foi bem-sucedido.
+\end{displayquote}
+
+O pareamento exato obteve sucesso em balancear as variáveis entre tratados e controles, com apenas 7 observações dos tratados sem correspondência.
+
+O pareamento por distância de Mahalanobis encontrou correspondência para toda a amostra tratamento (45 observações) e obteve sucesso no balanceamento para a maior parte das variáveis, exceto para faltas, que ainda apresenta diferença entre tratados e controles (eCDF Max de 11%, acima dos 5% considerados aceitáveis).
+
+Já o pareamento por escore de propensão usando o modelo logit falhou claramento no balanceamento, com eCDF > 5% para faltas, dois dos semestres e a distância (probabilidade predita de pertencer ao grupo das tratadas).
+
+```{r q1.c}
+library(MatchIt)
+
+m_exato <- matchit(
+ tratamento ~ faltas + sexo + semestre + primeiro_periodo,
+ data = dados,
+ method = "exact"
+)
+
+m_mahalanobis <- matchit(
+ tratamento ~ faltas + sexo + semestre + primeiro_periodo,
+ data = dados,
+ method = "nearest",
+ distance = "mahalanobis"
+)
+
+m_logit <- matchit(
+ tratamento ~ faltas + sexo + semestre + primeiro_periodo,
+ data = dados,
+ method = "nearest",
+ distance = "logit"
+)
+
+# balanceamento
+summary(m_exato)
+summary(m_mahalanobis)
+summary(m_logit)
+```
+
+## d
+
+\begin{displayquote}
+Para cada amostra pareada, faça uma regressão da nota dos alunos contra uma variável indicativa de que o aluno foi a mais do que 4 seções de monitoria(tratamento). Usando o pacote “Satargazer”, organize os resultados das cinco regressões em uma tabela arrumada, interprete-os e compare os resultados da amostra pareada com o que você encontrou nas regressões sem pareamento. O que você conclui sobre o efeito da monitoria sobre as notas dos alunos?
+\end{displayquote}
+
+Com as amostras pareadas, a regressão não é significativa (teste F) e o $R^2$ é reduzido drasticamente. O efeito do tratamento não é significativo em nenhuma das amostras pareadas. Isso significa que não há efeito causal da monitoria sobre as notas dos alunos (ou pelo menos que a amostra reduzida por conta do pareamento não é grande o suficiente para detectar o efeito, que é menos de 1 ponto em média).
+
+```{r q1.d}
+#| results: asis
+
+# modelos
+m_exato_bal <- lm(
+ nota ~ tratamento,
+ data = match.data(m_exato),
+ weights = weights
+)
+m_mahalanobis_bal <- lm(
+ nota ~ tratamento,
+ data = match.data(m_mahalanobis),
+ weights = weights
+)
+m_logit_bal <- lm(
+ nota ~ tratamento,
+ data = match.data(m_logit),
+ weights = weights
+)
+
+# matriz de covariância corrigida
+cov_m_exato_bal <- sandwich::vcovHC(m_exato_bal, type = "HC")
+cov_m_mahalanobis_bal <- sandwich::vcovHC(m_mahalanobis_bal, type = "HC")
+cov_m_logit_bal <- sandwich::vcovHC(m_logit_bal, type = "HC")
+
+# erros padrões robustos
+robust_se_m_exato_bal <- sqrt(diag(cov_m_exato_bal))
+robust_se_m_mahalanobis_bal <- sqrt(diag(cov_m_mahalanobis_bal))
+robust_se_m_logit_bal <- sqrt(diag(cov_m_logit_bal))
+
+# sumário
+stargazer::stargazer(
+ m1,
+ m2,
+ m_exato_bal,
+ m_mahalanobis_bal,
+ m_logit_bal,
+ single.row = FALSE,
+ se = list(
+ robust_se_m1,
+ robust_se_m2,
+ robust_se_m_exato_bal,
+ robust_se_m_mahalanobis_bal,
+ robust_se_m_logit_bal
+ ),
+ title = "Comparação de modelos",
+ header = FALSE,
+ font.size = "scriptsize",
+ column.sep.width = "3pt"
+)
+```
+
+# Q2
+
+Para essa questão, use o banco de dados `minwage.xlsx`. Ele contém informações coletadas por Card & Krueger (1994) para restaurantes de fast food nos estados de New Jersey (NJ) e Pennsylvania (PA) em duas rodadas de entrevistas: em Março e Novembro/Dezembro de 1992. Em Abril daquele ano, NJ aumentou seu salário mínimo de $4,25 para $5,05 por hora. Em um artigo bastante discutido, Card e Krueger usaram esse experimento natural para avaliar o efeito de um aumento do salário-mínimob sobre o emprego (um dos exemplos clássicos de controle de preços usados em livros texto de economia). Você vai usar esse banco de dados para replicar parte do estudo de Card e Krueger. No que segue, variáveis cujo nome que termina em “2” se referem a segunda rodada da pesquisa. As variáveis `fte` e `fte2` se referem a emprego equivalente em horário integral, ou seja, a soma do número de empregados em horário integral com metade do número de empregados que trabalham em meio expediente, excluindo gerentes, `dfte` se refere a mudança em `fte` entre a primeira e a segunda entrevista (`dfte` = `fte2` – `fte`); `dw` se refere a mudança no salário inicial dos funcionários entre a primeira e a segunda entrevistas; `state` é uma variável dummy para lojas localizadas em NJ e `sample` é uma variável dummy que assume o valor 1 se dados de salário e emprego estavam disponíveis na primeira e segunda entrevista. Na análise a seguir, você deve usar apenas as observações para as quais sample é igual a 1.
+
+## a
+
+Calcule o salário inicial médio (`wage_st`) separadamente para restaurantes em NJ e PA, em cada uma das rodadas de entrevistas.
+
+### 1
+
+Calcule a diferença nos salários médios para cada estado entre a primeira e a segunda entrevista.
+
+```{r q2.a.1}
+# carregar dados
+dados <- readxl::read_excel("lista/data/minwage.xlsx")
+
+# filtrando observações
+dados <- subset(dados, sample == 1)
+
+# salário médio
+salario_medio <- aggregate(
+ cbind(wage_st, wage_st2) ~ state,
+ data = dados,
+ FUN = mean
+)
+
+# diferença
+salario_medio <- transform(salario_medio, diff = wage_st2 - wage_st)
+
+salario_medio
+```
+
+### 2
+
+Calcule a diferença entre as diferenças para NJ e PA que você calculou acima.
+
+```{r q2.a.2}
+diff_in_diff <- diff(salario_medio$diff)
+
+diff_in_diff
+```
+
+### 3
+
+\begin{displayquote}
+Qual a interpretação dessa estimativa de diferença em diferenças para o efeito sobre os salários? Sob que condições essa conta fornece uma estimativa válida do aumento do salário-mínimo sobre os salários nos restaurantes de fast food?
+\end{displayquote}
+
+A estimativa de diferença em diferenças é de 0,5. Isso significa que, em média, o salário inicial dos funcionários dos restaurantes de fast food aumentou em 0.50 dólares por hora em NJ em relação a PA. Para que essa estimativa seja válida, é necessário que a diferença entre NJ e PA seja constante ao longo do tempo, exceto pelo aumento do salário mínimo em NJ. Isso é conhecido como a hipótese de tendências paralalelas: a diferença no resultado potencial sem tratamento $Y(0)$ para os indivíduos no grupo de tratamento $D=1$ na mudança de $t=0 \rightarrow t=1$ deve ser igual à diferença no resultado potencial sem tratamento para os indivíduos no grupo de controle $D=0$ no mesmo intervalo de tempo. Se essa hipótese for válida, a estimativa de diferença em diferenças é um estimador consistente do efeito do aumento do salário mínimo sobre os salários.
+
+### 4
+
+\begin{displayquote}
+Interprete seu resultado.
+\end{displayquote}
+
+Já interpretado acima.
+
+## b
+
+\begin{displayquote}
+Repita o mesmo exercício de (a) para a variável `fte`. Qual o impacto do aumento do salário mínimo sobre o emprego nos restaurantes de NJ?
+\end{displayquote}
+
+Referente à empregabilidade, a diferença em diferenças é de 2,30. Isso significa que, em média, o emprego nos restaurantes de fast food aumentou em 2,30 empregos equivalentes em horário integral em NJ em relação a PA. O mesmo pressuposto em relação à hipótese de tendências paralelas se aplica.
+
+```{r q2.b}
+# emprego médio
+emprego_medio <- aggregate(
+ cbind(fte, fte2) ~ state,
+ data = dados,
+ FUN = mean
+)
+
+# diferença
+emprego_medio <- transform(emprego_medio, diff = fte2 - fte)
+
+# diferença em diferenças
+diff_in_diff_emprego <- diff(emprego_medio$diff)
+
+emprego_medio
+diff_in_diff_emprego
+```
+
+## c
+
+A metodologia de diferenças em diferenças (DD) também pode ser implementada por meio da seguinte regressão:
+
+$$
+Y_{ist} = \alpha + \beta_1 \text{TREAT}_{is} + \gamma{POST}_t + \delta_{DD} \text{TREAT}_{is} \times \text{POST}_t + \varepsilon_{ist}
+$$
+
+onde $Y_{ist}$ representa emprego no restaurante $i$, no estado $s$ e período $t$, $\text{TREAT}_is$ é um indicador para a área de tratamento (NJ ou restaurantes de baixo salário em NJ), $\text{POST}_t$ é um indicador do período de tratamento (Novembro/Dezembro) e $\text{TREAT}_{is} \times \text{POST}_t$ é a interação entre essas duas *dummies*. Note que a regressão usa dados para restaurantes individuais, ao invés de dados para o estado, como em (a) e (b).
+
+### 1
+
+\begin{displayquote}
+Estime a regressão acima para salários e emprego. Como as estimativas diferem dos resultados que você encontrou em (a) e (b)?
+\end{displayquote}
+
+Primeiramente, deve-se manipular o *dataset*, uma vez que os estados (salário e emprego) no tempo 1 e 2 estão sendo tratados em colunas ao invés de linhas. Com cada linha representando cada estado em cada tempo, é possível estimar a regressão proposta. Com isso, foram criadas uma linha adicional para cada observação, coopiando os dados fixos e alterando as informações que devem ser atualizadas no tempo 2. Além disso, foi criada uma variável `post` para indicar qual o tempo da observação. Também alterei os valores de `state` para facilitar a interpretação.
+
+```{r q2.c.1}
+
+# pacotes
+suppressPackageStartupMessages({
+ library(tidyr)
+ library(dplyr)
+})
+
+# alongando a tabela para tratar a mudança no tempo como
+# linha ao invés de coluna
+colunas_repetidas <- setdiff(
+ names(dados),
+ grep("2$", names(dados), value = TRUE)
+)
+
+dados_long <- pivot_longer(
+ data = dados,
+ cols = matches(".*2$|.*[^2]$"),
+ names_to = c(".value", "post"),
+ names_pattern = "(.*?)(2?)$"
+) |>
+ mutate(
+ post = factor(ifelse(post == "2", "nov_dez", "mar"), levels = c("mar", "nov_dez")),
+ state = factor(ifelse(state == "1", "NJ", "PA"), levels = c("PA", "NJ"))
+ ) |>
+ fill(all_of(colunas_repetidas), .direction = "down")
+
+dados_long
+```
+
+Agora, é possível estimar a regressão proposta. Na primeira, em relação aos salários iniciais, o único coeficiente significativo foi o da interação `state:post`. Para interpretá-la, deve-se ter atenção aos valores de linha de base. Como a linha de base é PA e março, `state:post` representa o efeito quando o estado é NJ e o tempo é novembro/dezembro simultaneamente. Isso quer dizer que a diferença entre os estados em março não é significativa, assim como a diferença entre os tempos em PA. No entanto, a diferença entre os estados em novembro/dezembro é significativa, indicando que o salário em NJ aumentou em relação a PA. O coeficiente de 0.504 é consistente (na verdade, exato!) com o resultado de diferença em diferenças encontrado em (a).
+
+Para o emprego, o coeficiente da interação `state:post` também é consistente com o resultado de diferença em diferenças encontrado em (b), porém não foi significativo, indicando que não podemos apartar essa diferença do puro acaso amostral. Essa é uma vantagem de se usar a regressão, pois ela permite testar a significância estatística do efeito.
+
+```{r q2.c.1_2}
+#| results: asis
+
+# regressão
+m_salario <- lm(wage_st ~ state * post, data = dados_long)
+m_emprego <- lm(fte ~ state * post, data = dados_long)
+
+# sumário
+stargazer::stargazer(
+ m_salario,
+ m_emprego,
+ title = "Regressão de diferenças em diferenças",
+ header = FALSE
+)
+```
+
+### 2
+
+A implementação por regressão permite que você inclua controles adicionais. Estime as regressões para salários e emprego incluindo uma variável idicativa de que a loja é própria ou franquia (co_owned) e dummies para as cadeias(chain) de restaurantes.
+
+```{r q2.c.2}
+# regressão
+m_salario_2 <- lm(wage_st ~ state * post + co_owned + chain, data = dados_long)
+m_emprego_2 <- lm(fte ~ state * post + co_owned + chain, data = dados_long)
+```
+
+### 3
+
+Coloque os resultados que você obteve em 1 e 2 lado a lado na mesma tabela. Faça uma tabela para salário e outra para emprego.
+
+```{r q2.c.3}
+#| results: asis
+
+# sumário
+stargazer::stargazer(
+ m_salario,
+ m_salario_2,
+ title = "Regressão de diferenças em diferenças",
+ header = FALSE
+)
+
+stargazer::stargazer(
+ m_emprego,
+ m_emprego_2,
+ title = "Regressão de diferenças em diferenças",
+ header = FALSE
+)
+```
+
+### 4
+
+\begin{displayquote}
+Os seus resultados mudaram quando incluiu as dummies para restaurantes? Essa mudança era esperada? Explique por quê.
+\end{displayquote}
+
+Os resultados não mudaram (o coeficiente de interação). O que mudou foi a qualidade do ajuste. Isso pode ser importante na hora de detectar um efeito, dado que o desvio-padrão dos coeficientes é menor e pode ser o suficiente para detectar um efeito que não seria detectado sem os controles adicionais.
+
+## d
+
+Uma alternativa a comparação entre restaurantes em NJ e PA seria comparar restaurantes em NJ que pagam salários altos vs. restaurantes que pagam salários mais baixos antes do aumento do salário-mínimo. Restrinja sua amostra para os restaurantes de NJ apenas.
+
+```{r q2.d}
+# filtrando observações
+dados_nj <- subset(dados_long, state == "NJ")
+```
+
+### 1
+
+\begin{displayquote}
+Você esperaria que as suposições para a metodologia DD sejam mais fáceis de serem defendidas na comparação de restaurantes em NJ do que na comparação de restaurantes em NJ vs. restaurantes em PA?
+\end{displayquote}
+
+Não, pois haveria apenas o grupo de tratamento (NJ) sem um grupo de controle que servisse como um contrafactual válido para a comparação. A hipótese de tendências paralelas não poderia ser testada, pois não haveria um grupo de controle para comparar a evolução do salário e do emprego. Aliás, tendo apenas um ponto no tempo antes da intervenção, a hipótese de tendências paralelas já não pode ser testada!
+
+### 2
+
+\begin{displayquote}
+Construa uma variável que indique os restaurantes que pagam menos que \$5 antes do aumento do salário-mínimo. Use uma regressão para calcular a estimativa DD do efeito do aumento do salário-mínimo sobre emprego e salários. Qual impacto você encontra para cada uma dessas variáveis usando os restaurantes de NJ apenas?
+\end{displayquote}
+
+A variável de interação `low_wage:post` é significativa para o salário, indicando que o salário aumentou em 0.62 dólares por hora para os restaurantes de baixo salário em NJ. Para o emprego, a interação não é significativa a 95% de confiança.
+
+```{r q2.d.2}
+#| results: asis
+
+# variável de baixo salário
+dados_nj <- by(dados_nj, dados_nj$sheet, function(conjunto) {
+ conjunto$low_wage <- ifelse(any(conjunto$wage_st < 5 & conjunto$post == "mar"), 1, 0)
+ conjunto
+}) |>
+ do.call(what = rbind)
+
+# regressão
+m_salario_nj <- lm(wage_st ~ low_wage * post, data = dados_nj)
+m_emprego_nj <- lm(fte ~ low_wage * post, data = dados_nj)
+
+# sumário
+stargazer::stargazer(
+ m_salario_nj,
+ m_emprego_nj,
+ title = "Regressão de diferenças em diferenças",
+ header = FALSE
+)
+```
+
+### 3
+
+\begin{displayquote}
+Compare as estimativas obtidas com o que você obteve anteriormente na parte (c). Os resultados são muito diferentes?
+\end{displayquote}
+
+Os resultados para `low_wage` mostram um impacto maior no salário (aproximadamente 10 cents a mais). Para a empregabilidade, continua não significativo a 95% de confiança.
+
+## e
+
+Repita a regressão em (d) usando agora os restaurantes em PA.
+
+```{r q2.e}
+#| results: asis
+
+# filtrando observações
+dados_pa <- subset(dados_long, state == "PA")
+
+# variável de baixo salário
+dados_pa <- by(dados_pa, dados_pa$sheet, function(conjunto) {
+ conjunto$low_wage <- ifelse(
+ any(conjunto$wage_st < 5 & conjunto$post == "mar"),
+ 1,
+ 0
+ )
+ conjunto
+}) |>
+ do.call(what = rbind)
+
+# regressão
+m_salario_pa <- lm(wage_st ~ low_wage * post, data = dados_pa)
+m_emprego_pa <- lm(fte ~ low_wage * post, data = dados_pa)
+
+# sumário
+stargazer::stargazer(
+ m_salario_pa,
+ m_emprego_pa,
+ title = "Regressão de diferenças em diferenças",
+ header = FALSE
+)
+```
+
+### 1
+
+\begin{displayquote}
+Compare os resultados que você encontrou para PA com os resultados que você encontrou para NJ.
+\end{displayquote}
+
+Obtemos resultados semelhantes, com `low_wage:postnov_dez` significativo para salário, numa magnitude de 0.35 cents, quase metade de NJ, e não significativo para emprego.
+
+### 2
+
+\begin{displayquote}
+Faça um teste estatístico para a hipótese que o coeficiente para a variável de baixo salário tenha o mesmo valor em NJ e PA.
+\end{displayquote}
+
+Com p-valor de 0.013, o teste de diferença de médias nos permite rejeitar a hipótese nula de que os coeficientes são iguais. Os coeficientes não têm o mesmo valor em NJ e PA.
+
+```{r q2.e.2}
+# coeficientes e erro padrão
+beta_1 <- coef(m_salario_nj)["low_wage:postnov_dez"]
+beta_2 <- coef(m_salario_pa)["low_wage:postnov_dez"]
+
+se_1 <- summary(m_salario_nj)$coefficients["low_wage:postnov_dez", "Std. Error"]
+se_2 <- summary(m_salario_pa)$coefficients["low_wage:postnov_dez", "Std. Error"]
+
+# estatística de teste
+z <- (beta_1 - beta_2) / sqrt(se_1^2 + se_2^2)
+
+# p-valor
+p_valor <- 2 * (1 - pnorm(abs(z)))
+
+p_valor
+```
+
+### 3
+
+Por que verificar se o aumento do salário-mínimo em NJ teve impacto em PA pode ser uma maneira de confirmar que a metodologia produz resultados sensatos? O que você pode concluir com essa comparação?
+
+Há dois caminhos: ou é esperado que o aumento do salário-mínimo em NJ tenha um efeito de *spillover* em PA --- causado, por exemplo, pela migração de trabalhadores de PA para NJ e consequente redução da oferta de trabalho em PA, aumentando o salário médio ---, de forma que o resultado confirma a metodologia, ou é esperado que o aumento do salário-mínimo em NJ não tenha efeito em PA, e o resultado indica que, ao menos, parte do resultado em NJ seja devido a fatores não observáveis (que também afetaram PA, mas não foram capturados na análise).
+
+Sem o conhecimento de economia do trabalho e da região, eu suponho que o segundo caso seja mais provável, ou seja, que o aumento do salário-mínimo em NJ não tenha efeito em PA e que a metodologia tenha sucesso em capturar o efeito causal do aumento do salário-mínimo em NJ mas que parte desse efeito seja devido a fatores não observáveis, registrados no coeficiente de `low_wage:postnov_dez` em PA.
+
+# Q3
+
+Para essa questão, use o banco de dados `Guns.xlsx`. Uma descrição detalhada dos dados está contida no arquivo `Guns_Description.pdf`. Alguns estados dos EUA promulgaram leis que permitem que os cidadãos carreguem armas escondidas. Essas leis, conhecidas como “shall-issue laws”, instruem as autoridades locais a emitirem uma permissão de armas ocultas a todos os requerentes que sejam cidadãos, sejam mentalmente competentes e não tenham sido condenados por crime doloso (alguns estados têm algumas restrições adicionais). Os proponentes argumentam que, se mais pessoas portarem armas ocultas, o crime diminuirá, porque os criminosos são dissuadidos de atacar outras pessoas. Oponentes argumentam que o crime aumentará por causa do uso acidental ou espontâneo da arma. Nessa questão, você usará os dados de Ayres & Donohue (2003) para estimar o efeito das leis de armas ocultas em crimes violentos.
+
+```{r q3}
+dados <- readxl::read_excel("lista/data/Guns.xlsx") |>
+  transform(
+    shall = as.factor(shall),
+    stateid = as.factor(stateid)
+  )
+```
+
+## a
+
+Estime uma regressão de `ln(vio)` contra `shall` e uma regressão de `ln(vio)` contra `shall`, `incarc_rate`, `density`, `avginc`, `pop`, `pb1064`, `pw1064` e `pm1029`.
+
+```{r q3.a}
+#| results: asis
+
+# regressões
+m1 <- lm(log(vio) ~ shall, data = dados)
+m2 <- lm(
+  log(vio) ~ shall + incarc_rate + density + avginc + pop + pb1064 + pw1064 + pm1029,
   data = dados
 )
-print(tableone, nonnormal = "faltas")
+
+# sumário
+stargazer::stargazer(
+ m1,
+ m2,
+ title = "Regressões",
+ header = FALSE
+)
 ```
+
+### i
+
+\begin{displayquote}
+Interprete o coeficiente de shall na segunda regressão. Essa estimativa pode ser considerada um efeito causal? Por que?
+\end{displayquote}
+
+O coeficiente de `shall` em ambas regressões são significativos e negativos, o que quer dizer que a presença de leis de armas ocultas está associada a uma redução no crime violento. No entanto, a estimativa não pode ser considerada um efeito causal, pois não foi estabelecido um contrafactual válido: Não há controle de indivíduos ou de tempo, de forma que não é possível erificar a hipótese de tendências paralelas. O efeito pode ser devido a fatores não observados associados à passagem do tempo ou não presente em todos os estados que implementaram as leis de armas ocultas.
+
+### ii
+
+\begin{displayquote}
+As variáveis de controle adicionadas na segunda regressão mudam muito a magnitude do efeito das leis de armas ocultas na primeira regressão? Mudam a significância estatística do coeficiente estimado? Você espera que essa estimativa se aproxime mais de um efeito causal do que a anterior?
+\end{displayquote}
+
+Na primeira regressão, o efeito de `shall` é de $e^{-0443}=0.6421$, ou seja, uma redução de 35,8% no crime violento. Na segunda regressão, o efeito é de $e^{-0.368}=0.692$, ou seja, uma redução de 30,8%. A diferença não é muito grande e também não muda a significância estatística do coeficiente, que continua significativo a 95% de confiança. A inclusão das variáveis de controle não torna a estimativa mais próxima de um efeito causal, pois os problemas citados anteriormente não foram resolvidos. 
+
+## b
+
+\begin{displayquote}
+Os resultados se alteram se você adicionar efeitos fixos para estados e períodos de tempo (`TWFE`)? Qual dos resultados é mais crível para estimar um efeito causal e por quê?
+\end{displayquote}
+
+Partindo para um modelo do tipo *within* com efeitos fixos individuais e temporais (@eq-1), representados no código pelo argumento `effect = "twoways"`, temos que o coeficiente de `shall` deixa de ser significativo, ou seja, a implementação do porte de armas escondidas não tem efeito significativo no crime violento.
+
+O uso de efeitos fixos para estados e períodos de tempo é mais crível para estimar um efeito causal, uma vez que foram adicionados os controle para estados e tempo, permitindo a comparação de cada estado consigo mesmo ao longo do tempo. Isso permite que a hipótese de tendências paralelas seja testada, o que não era possível nos modelos anteriores.
+
+$$
+y_{it} = x'{it}\beta + \alpha_i + \theta_t + \varepsilon_{it}
+$$ {#eq-1} 
+
+```{r q3.b}
+#| results: asis
+
+# pacote para dados em painel
+suppressPackageStartupMessages(library(plm))
+
+# organização dos dados em painel
+painel <- pdata.frame(dados, index = c("stateid", "year"))
+
+# modelo
+m3 <- plm(
+  log(vio) ~ shall,
+  data = painel,
+  model = "within",
+  effect = "twoways"
+)
+
+m4 <- plm(
+  log(vio) ~ shall + incarc_rate + density + avginc + pop + pb1064 + pw1064 + pm1029,
+  data = painel,
+  model = "within",
+  effect = "twoways"
+)
+
+# sumário
+stargazer::stargazer(
+ m3,
+ m4,
+ title = "Regressões em painel",
+ header = FALSE
+)
+```
+
+## c
+
+\begin{displayquote}
+Usando o modelo de estudos de evento, tente fornecer alguma evidência da validade da hipótese de tendências paralelas entre tratados e controles.
+\end{displayquote}
+
+Para testar a hipótese de tendências paralelas, é necessário que a diferença entre os grupos tratados e de controle seja constante ao longo do tempo, exceto pelo tratamento. Entretanto, vemos na @fig-absoluto que a inclinação da reta para o grupo tratado pré-tratamento é diferente da inclinação do grupo controle, indicando que a hipótese de tendências paralelas não é válida. Além disso, a inclinação do grupo controle é a mesma do grupo tratado pós-tratamento, o que pode ser um indício da ausência de efeito causal do tratamento.
+
+A @fig-relativo mostra que, em muitos dos estados, a quantidade de crimes violentos aumenta após o tratamento, o que é contrário à hipótese de que o porte de armas escondidas reduziria o crime violento.
+
+```{r q3.c.1}
+#| label: fig-relativo
+#| fig.cap: Violência por ano relativo ao tratamento
+
+# ano de início do tratamento
+anos_tratamento <- aggregate(
+  year ~ stateid,
+  data = subset(dados, shall == 1),
+  FUN = min
+)
+
+# merge com dataset
+dados <- merge(dados, anos_tratamento, by = "stateid", all.x = TRUE) |>
+  (\(dadinho) sort_by(dadinho, dadinho$stateid, dadinho$year.x))()
+
+# renomear variáveis
+names(dados)[names(dados) %in% c("year.x", "year.y")] <- c("year", "year_tratamento")
+
+# mais data engineering!
+dados <- within(dados, {
+  # anos relativos ao tratamento
+  year_rel <- year - year_tratamento
+  # indicador de pré ou pós tratamento
+  tratamento <- ifelse(year_rel >= 0, "post", "pre")
+  # indicador de controle
+  tratamento <- ifelse(is.na(tratamento), "controle", tratamento)
+})
+
+# plotar quantidade de `vio` por ano relativo ao tratamento para ambos grupos
+library(ggplot2)
+dados |>
+  subset(tratamento != "controle") |>
+  ggplot(aes(x = year_rel, y = vio, color = tratamento)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ poly(x, 3)) +
+  facet_wrap(~ stateid, scales = "free") +
+  labs(
+    x = "Ano relativo ao tratamento",
+    y = "Violência"
+  ) +
+  # removendo elementos para melhor visualização
+  theme(
+    # legenda
+    legend.position = "none",
+    # removendo números de eixos
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    # reduzindo strip text e largura
+    strip.text = element_text(size = 6),
+    strip.background = element_blank()
+  )
+```
+
+```{r q3.c.2}
+#| label: fig-absoluto
+#| fig.cap: Violência por ano, grupos tratado e controle
+
+# plotar quantidade de `vio` por ano, considerando apenas período sem tratamento
+dados |>
+  #subset(tratamento != "post") |>
+  ggplot(aes(x = year, y = vio, color = tratamento)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Violência por ano",
+    x = "Ano",
+    y = "Violência"
+  )
+```
+
+## d
+
+\begin{displayquote}
+Usando a nomenclatura de Callaway e Sant'Anna (2021), quantos grupos de tratados existem no banco de dados?
+\end{displayquote}
+
+Neste caso, a quantidade de grupos de tratados corresponde aos anos distintos de implementação do tratamento, que são 23.
+
+```{r q3.d}
+# quantidade de grupos de tratados
+grupos_unicos <- unique(dados$year[dados$shall == 1])
+grupos_unicos
+
+length(grupos_unicos)
+```
+
+## e
+
+\begin{displayquote}
+Usando o método de Callaway e Sant'Anna (2021) estime os diferentes Efeitos Médios do Programa para Grupo-Período. Existe evidência de efeitos heterogêneos por grupo-período?
+\end{displayquote}
+
+Sim. Na maior parte dos grupos, ou não há observações suficientes para estimação do modelo, ou não há efeito significativo, ou quando há é apenas pontual, em um ano. Apenas no grupo 95 há efeito significativo em vários anos consecutivos, sendo negativo para o ano de 1989 mas positivo de 1994 em diante.
+
+```{r q3.e}
+# mais features
+dados <- within(dados, {
+  G <- ifelse(is.na(year_tratamento), 0, year_tratamento)
+  D <- ifelse(year >= year_tratamento & !is.na(year_tratamento), 1, 0)
+  stateid_n <- as.numeric(stateid)
+})
+
+# Estimar os efeitos médios do programa para grupo-período
+efeitos_medios <- did::att_gt(
+  yname = "vio",
+  tname = "year",
+  idname = "stateid_n",
+  gname = "G",
+  xformla = ~ incarc_rate + pb1064 + pw1064 + avginc + density,
+  data = dados,
+  panel = TRUE
+)
+
+# sumário
+summary(efeitos_medios)
+```
+
+## f
+
+\begin{displayquote}
+A partir da resposta anterior, obtenha o efeito médio agregado total e compare esse resultado como o que você obteve na letra “a”.
+\end{displayquote}
+
+O efeito médio agregado total é de -6,56, bem menor do que o obtido na letra "a", onde os coeficientes foram de -0.44 e -0.37.
+
+```{r q3.f}
+mean(efeitos_medios$att, na.rm = TRUE)
+
+coef(m1)["shall1"]
+coef(m2)["shall1"]
+```
+## g
+
+\begin{displayquote}
+Repita a análise usando `ln(rob)` e `ln(mur)` no lugar de `ln(vio)`. Coloque seus resultados em tabelas arrumadas.
+\end{displayquote}
+
+O resultado da regressão com efeitos fixos para estados e períodos de tempo mostra que a implementação do porte de armas escondidas também não tem efeito significativo no número de roubos e assassinatos.
+
+```{r q3.g}
+#| results: asis
+
+# modelo
+m5 <- plm(
+  log(rob) ~ shall + incarc_rate + density + avginc + pop + pb1064 + pw1064 + pm1029,
+  data = painel,
+  model = "within",
+  effect = "twoways"
+)
+
+m6 <- plm(
+  log(mur) ~ shall + incarc_rate + density + avginc + pop + pb1064 + pw1064 + pm1029,
+  data = painel,
+  model = "within",
+  effect = "twoways"
+)
+
+# sumário
+stargazer::stargazer(
+ m5,
+ m6,
+ title = "Regressões em painel",
+ header = FALSE
+)
+```
+
+## h.
+
+\begin{displayquote}
+Baseado na sua análise, que conclusões você tiraria a respeito dos efeitos das leis de armas ocultas sobre as taxas de criminalidade? Use uma linguagem clara e acessível, de maneira que até o deputado Marcel Van Hatten (Novo/RS) entenda.
+\end{displayquote}
+
+Eu tenho alguma experiência adestrando cachorros, mas asnos não são minha especialidade. Farei meu melhor.
+
+Não existem evidências para se afirmar que as "shall issue law" têm qualquer efeito sobre crimes violentos, roubos e assassinatos. A análise estatística não encontrou efeitos causais entre a promulgação dessas leis e a criminalidade. Como podemos ver na @fig-relativo, em alguns estados a incidência de crimes violentos diminuiu e em outros aumentou. Isso quer dizer que existe uma grande variabilidade nos resultados, e a verdadeira causa dessas variações não foi capturada na análise. Se houvesse efeito causal das leis de armas ocultas, esperaríamos que a criminalidade diminuísse de forma consistente após a implementação dessas leis em todos os estados, o que não foi observado. Portanto, não podemos afirmar que as "shall issue laws" têm qualquer efeito sobre a criminalidade.
+
+Além disso, a @fig-absoluto mostra que a tendência de crimes violentos entre os estados que nunca implementaram as leis de armas ocultas é a mesma que a dos estados que implementaram após a implementação. Isso também reforça a ideia de que a implementação das leis de armas ocultas não teve efeito sobre a criminalidade.
