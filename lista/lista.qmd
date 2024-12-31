@@ -935,7 +935,7 @@ Obs.: a quantidade reduzida de observações nos modelos 3 e 4 pode ter afetado 
 
 ```{r q4.d}
 #| results: asis
-#| label: tab-q4.d
+#| label: tbl-q4.d
 #| tbl-cap: Coeficientes da forma reduzida
 
 # modelo 1
@@ -985,7 +985,7 @@ A variável `lwage` foi substituída pela variável `educ` como variável depend
 
 ```{r q4.e}
 #| results: asis
-#| label: tab-q4.e
+#| label: tbl-q4.e
 #| tbl-cap: Coeficientes do primeiro estágio
 
 # modelo 1
@@ -1033,14 +1033,14 @@ stargazer::stargazer(
 ## f
 
 \begin{displayquote}
-Para cada modelo estimado na letra b, estime agora usando a variável nearc4 como instrumento para educação. Organize os quatro modelos em uma tabela exibindo apenas os coeficientes das variáveis do primeiro modelo e indicando as variáveis incluídas nos demais modelos. Interprete os resultados obtidos para a variável educ, mostrando o que significa  essa  magnitude e o quão  diferente são as  estimativas nas diferentes especificações. Compare essas estimativas às obtidas na letra b, comentando se a diferença obtida é consistente com a sua resposta na letra c.
+Para cada modelo estimado na letra b, estime agora usando a variável nearc4 como instrumento para educação. Organize os quatro modelos em uma tabela exibindo apenas os coeficientes das variáveis do primeiro modelo e indicando as variáveis incluídas nos demais modelos. Interprete os resultados obtidos para a variável educ, mostrando o que significa essa magnitude e o quão diferente são as estimativas nas diferentes especificações. Compare essas estimativas às obtidas na letra b, comentando se a diferença obtida é consistente com a sua resposta na letra c.
 \end{displayquote}
 
 A variável `educ` é significativa apenas nos dois primeiros modelos, diferentemente dos modelos da letra b em que `educ` foi significativo em todos os modelos. Considerando que há centenas de linhas de dados faltantes em relação à educação dos pais, os modelos 3 e 4 contam com quase 800 observações a menos, sendo mais difícil detectar um efeito. Além disso, a maioria das variáveis incluídas nos modelos 3 e 4 não são significativas, resultando na adição de ruído trazido por essas covariáveis.
 
 ```{r q4.f}
 #| results: asis
-#| label: tab-q4.f
+#| label: tbl-q4.f
 #| tbl-cap: Coeficientes com nearc4 como instrumento
 
 # pacote
@@ -1115,7 +1115,7 @@ O coeficiente de `nearc4` é significativo, indicando que a proximidade de uma f
 
 ```{r q4.h}
 #| results: asis
-#| label: tab-q4.h
+#| label: tbl-q4.h
 #| tbl-cap: Regressão de IQ contra nearc4
 
 # modelo
@@ -1138,7 +1138,7 @@ A inclusão das variáveis regionais torna `nearc4` não significativo, indicand
 
 ```{r q4.i}
 #| results: asis
-#| label: tab-q4.i
+#| label: tbl-q4.i
 #| tbl-cap: Regressão de IQ contra nearc4 com variáveis regionais
 
 # modelo
@@ -1157,78 +1157,146 @@ stargazer::stargazer(
 
 Esta questão é motivada pelo artigo "The Persistent Effects of Peru's Mining Mita" de Melissa Dell (2010). A autora busca compreender os efeitos persistentes da Mita, um sistema extrativista de trabalho forçado implementado pelo império espanhol no Peru e na Bolívia. Dell avalia se essa instituição, que foi encerrada há duzentos anos, ainda tem efeitos sobre o consumo e a renda das famílias nos dias de hoje. O artigo está disponível no link; familiarize-se com ele antes de começar. Você precisará usaro arquivo mitaData.csv para realizar o exercício a seguir.
 
+```{r q5}
+dados <- read.csv("lista/data/mitaData.csv") |>
+  janitor::clean_names()
+```
+
 ## a
 
 Dell utiliza um design de regressão descontínua para comparar os resultados entre pessoas que vivem em distritos que participaram da antiga Mita e aquelas que vivem em distritos que não participaram. Discuta brevemente a estratégia de identificação do efeito causal ressaltando:
 
 ### i
 
+\begin{displayquote}
 Por que a comparação dos distritos que tiveram o sistema de Mita com os que não tiveram é inadequada?
+\end{displayquote}
+
+Para que seja um contrafactual válido, todas as características dos elementos dos grupos de controle devem ser iguais a de tratamento, exceto pela intervenção. A comparação dos distritos que tiveram o sistema de Mita com os que não tiveram é inadequada porque os distritos que tiveram a Mita podem ser diferentes dos que não tiveram em outras características que afetam o consumo e a renda das famílias. Por exemplo, os distritos que tiveram a Mita podem ter sido escolhidos por serem mais ricos ou mais pobres, ou por terem uma população com características diferentes. Portanto, a comparação direta entre os distritos que tiveram a Mita e os que não tiveram pode levar a um viés de seleção.
 
 ### ii
 
+\begin{displayquote}
 Qual a hipótese de identificação usada pela autora?
+\end{displayquote}
+
+Na página 1.871 ela cita dois pressupostos: de que os distritos próximos à fronteira da Mita são semelhantes em todas as características, exceto pela participação na Mita. Portanto, a comparação entre os distritos próximos à fronteira da Mita que participaram e os que não participaram pode fornecer uma estimativa causal do efeito da Mita sobre o consumo e a renda das famílias. E que os resultados potenciais sobre tratamento e controle são contínuos ao longo das latitudes e longitudes da fronteira.
 
 ### iii
 
+\begin{displayquote}
 Qual a equação estimada e qual variável corresponde a estratégia usada pela autora?
+\end{displayquote}
+
+A equação estimada é:
+
+$$
+c_{idb} = \alpha + \gamma mita_d + X'_{id}\beta + f(\text{geographic location}_d) + \phi_b + \varepsilon_{idb}
+$$
+
+Para brevidade, a descrição de cada uma das variáveis está no último parágrafo da página 1.870.
 
 ## b
 
-Agora vamos reproduzir o resultado principal de Dell. Dadas as variáveis de longitude e latitude $x$ e $y$, construa $x^2$, $y^2$, $xy$, $x^3$, $y^3$, $x^2y$ e $xy^2$.Faça uma regressão do logaritmo do consumo equivalente dos domicílios (2001) (`lhhequiv`) em relação à variável `Mita` (pothuan_mita), todos os termos polinomiais, elevação (elv_sh), inclinação média (mean_slope), número de bebês (infants), crianças (children), adultos (adults) e efeitos fixos dos segmentos de fronteira (fe4_1, bfe4_2, bfe4_3). Agrupe os erros padrão por distrito. Execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
+Agora vamos reproduzir o resultado principal de Dell. Dadas as variáveis de longitude e latitude $x$ e $y$, construa $x^2$, $y^2$, $xy$, $x^3$, $y^3$, $x^2y$ e $xy^2$. Faça uma regressão do logaritmo do consumo equivalente dos domicílios (2001) (`lhhequiv`) em relação à variável `Mita` (pothuan_mita), todos os termos polinomiais, elevação (elv_sh), inclinação média (mean_slope), número de bebês (infants), crianças (children), adultos (adults) e efeitos fixos dos segmentos de fronteira (fe4_1, bfe4_2, bfe4_3). Agrupe os erros padrão por distrito. Execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
+
+Obs.: Não há variável chamada `mean_slope` no banco de dados. Vou assumir que a variável correta é `slope`. Também não há `fe4_1`, vou supor que é `bfe4_1`.
+
+Na @tbl-q5.b, vemos que os coeficientes de `pothuan_mita` são significativos (5% significância) para os modelos 1 e 3, indicando que a participação na Mita aumenta o consumo das famílias. O coeficiente de `pothuan_mita` é maior
+
+```{r q5.b}
+# criar termos polinomiais
+dados <- dados |>
+  transform(
+    x2 = lon^2,
+    y2 = lat^2,
+    xy = lon * lat,
+    x3 = lon^3,
+    y3 = lat^3,
+    x2y = lon^2 * lat,
+    xy2 = lon * lat^2
+  )
+
+# função para regressão
+regressao <- function(distancia) {
+  lm(
+    lhhequiv ~ pothuan_mita + lon + lat + x2 + y2 + xy + x3 + y3 + x2y + xy2 +
+    elv_sh + slope + infants + children + adults + bfe4_1 + bfe4_2 + bfe4_3,
+      data = subset(dados, d_bnd < distancia)
+  )
+}
+
+# regressões
+m100 <- regressao(100)
+m75 <- regressao(75)
+m50 <- regressao(50)
+
+# erros padrão robustos
+robust_se_m100 <- sqrt(diag(sandwich::vcovHC(m100, type = "HC1", cluster = ~district)))
+robust_se_m75 <- sqrt(diag(sandwich::vcovHC(m75, type = "HC1", cluster = ~district)))
+robust_se_m50 <- sqrt(diag(sandwich::vcovHC(m50, type = "HC1", cluster = ~district)))
+```
+
+```{r q5.b-sumario}
+#| results: asis
+#| label: tbl-q5.b
+
+# sumário
+stargazer::stargazer(
+  m100, m75, m50,
+  se = list(robust_se_m100, robust_se_m75, robust_se_m50),
+  header = FALSE,
+  single.row = TRUE,
+  font.size = "scriptsize",
+  title = "Regressões com termos polinomiais"
+)
+```
 
 ## c
 
 Execute as mesmas regressões de antes, mas, em vez de termos polinomiais em longitude e latitude, utilize um polinômio cúbico na distância até Potosí (dpot). Ou seja, inclua a primeira, a segunda e a terceira potência dessa variável nas regressões. Novamente, agrupe os erros padrão por distrito e execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
 
-# Q6
+Na @tbl-q5.c, vemos que os coeficientes de `dpot` são significativos (5% significância) para os modelos 1 e 3, indicando que a distância até Potosí afeta o consumo das famílias. O coeficiente de `dpot` é maior para o modelo 3, indicando que o efeito da distância é maior para distâncias menores.
 
-Essa questão replica a análise contida no artigo “Evaluating the Effect of Homicide Prevention Strategies in São Paulo, Brazil: A Synthetic Control Approach”de Danilo Freire (2010). O autor busca mensurar o efeito causal agregado de políticas públicas sobre as taxas de homicídios em São Paulo. O artigo está disponível no link; familiarize-se com ele antes de começar. Você precisará usar o arquivo df.Rdata para realizar o exercício a seguir. Descrição da base: O painel de dados contém informações de 1990 a 2009, para os 26 estados e o Distrito Federal. Os seguintes estados constam na base, mas não são utilizados na análise: Bahia e Sergipe.
+```{r q5.c}
+# criar termos polinomiais de dpot
+dados <- dados |>
+  transform(
+    dpot2 = dpot^2,
+    dpot3 = dpot^3
+  )
 
-- Formato: dataframe - painel.
-- 1 unidade tratada: nome do estado: São Paulo.
-- 24 regiões de controle.
-- 20 anos (1990:2009).
-- Identificadores:
-  - abbreviation: sigla do estado
-  - code: código do estado
-  - state: nome do estado
-  - year: ano
-- Variável dependente:homicide.rates (número de homicídios por 100.000 habitantes)
-- Preditores: 1990:1998:
-  - homicide.rates: taxa de homicídios (número de homicídios por 100.000 habitantes);
-  - state.gdp.capita: PIB per capita estadual (em reais de 2010);
-  - state.gdp.growth.percent: crescimento do PIB estadual (percentual, em reais de 2010);
-  - population.projection.ln: logaritmo natural da população (projeções anuais da população do estado);
-  - proportion.extreme.poverty: população vivendo em extrema pobreza (percentual da população do estado que nãoatinge a ingestão mínima de 2.000 calorias por dia);
-  - years.schooling.imp: anos de escolaridade (número  médio  de  anos  de  instrução formal em estabelecimentos de ensino-homens e mulheres com 25 anos ou mais). As observações ausentes foram imputadas com interpolação linear;
-  - gini.imp: índice de Gini (medida de desigualdade que varia de 0 a 1, onde 0 é o mais igual e 1 o mais desigual). As observações ausentes foram imputadas com interpolação linear.
-- Para organizar os dados, use os seguintes parâmetros na função dataprep():
-  - predictors.op = "mean";
-  - time.predictors.prior = c(1990:1998);
-  - time.optimize.ssr = c(1990:1998);
-  - time.plot = c(1990:2009);
+# função para regressão
+regressao_dpot <- function(distancia) {
+  lm(
+    lhhequiv ~ pothuan_mita + dpot + dpot2 + dpot3 +
+    elv_sh + slope + infants + children + adults + bfe4_1 + bfe4_2 + bfe4_3,
+    data = subset(dados, d_bnd < distancia)
+  )
+}
 
-## a
+# regressões
+m100_dpot <- regressao_dpot(100)
+m75_dpot <- regressao_dpot(75)
+m50_dpot <- regressao_dpot(50)
 
-Discuta brevemente a estratégia de identificação empregada pelo autor ressaltando suas vantagens em relação a estudos de caso comparativos qualitativos. Indique também uma crítica a abordagem seguida pelo autor.
+# erros padrão agrupados por distrito
+robust_se_m100_dpot <- sqrt(diag(sandwich::vcovHC(m100_dpot, type = "HC1", cluster = ~district)))
+robust_se_m75_dpot <- sqrt(diag(sandwich::vcovHC(m75_dpot, type = "HC1", cluster = ~district)))
+robust_se_m50_dpot <- sqrt(diag(sandwich::vcovHC(m50_dpot, type = "HC1", cluster = ~district)))
+```
 
-## b
+```{r q5.c.sumario}
+#| results: asis
+#| label: tbl-q5.c
+#| tbl-cap: "Regressões com polinômio cúbico na distância até Potosí"
 
-Obtenha os pesos para as covariadas (preditores) e para os estados doadores para construção do São Paulo sintético. Organize os resultados como na tabela 1 do artigo.
-
-## c
-
-Elabore uma tabela que compara os valores dos preditores pré-tratamento para a unidade tratada, a unidade sintética de controle e todas as unidades na amostra (Tabela 2, no artigo). Comente sobre a semelhança entre SP real e seu controle em cada uma das dimensões.
-
-## d
-
-Elabore dois gráficos ilustrativos dos resultados: um mostrando a evolução da trajetória da taxa de homicídios em SP e em seu controle (figura 2 do artigo) e outro mostrando o gap entre a taxa de homicídios em SP e seu controle (figura 3 do artigo) e comente brevemente os resultados.
-
-## e
-
-Escolha o estado não tratado com maior peso no controle sintético e faça um teste de placebo tentando encontrar algum  efeito da política sobre esse estado.  Comente seu resultado ressaltando sua implicação para a análise.
-
-## f
-
-Aumente essa análise para todos os demais estados e coloque os resultados em um gráfico ilustrativo (figura 6 do artigo) fazendo o teste de permutação sugerido por Abadie Diamond e Hainmueller (2010). Comente brevemente os resultados.
+# sumário
+stargazer::stargazer(
+  m100_dpot, m75_dpot, m50_dpot,
+  se = list(robust_se_m100_dpot, robust_se_m75_dpot, robust_se_m50_dpot),
+  header = FALSE,
+  single.row = TRUE,
+  font.size = "scriptsize"
+)
+```
