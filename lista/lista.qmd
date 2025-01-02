@@ -935,8 +935,6 @@ Obs.: a quantidade reduzida de observações nos modelos 3 e 4 pode ter afetado 
 
 ```{r q4.d}
 #| results: asis
-#| label: tbl-q4.d
-#| tbl-cap: Coeficientes da forma reduzida
 
 # modelo 1
 m1_reduzido <- lm(lwage ~ nearc4, data = dados)
@@ -971,7 +969,8 @@ stargazer::stargazer(
   header = FALSE,
   font.size = "scriptsize",
   single.row = TRUE,
-  column.sep.width = "1pt"
+  column.sep.width = "1pt",
+  title = "Regressões da forma reduzida"
 )
 ```
 
@@ -985,8 +984,6 @@ A variável `lwage` foi substituída pela variável `educ` como variável depend
 
 ```{r q4.e}
 #| results: asis
-#| label: tbl-q4.e
-#| tbl-cap: Coeficientes do primeiro estágio
 
 # modelo 1
 m1_estagio1 <- lm(
@@ -1026,7 +1023,8 @@ stargazer::stargazer(
   header = FALSE,
   font.size = "scriptsize",
   single.row = TRUE,
-  column.sep.width = "1pt"
+  column.sep.width = "1pt",
+  title = "Estágio 1"
 )
 ```
 
@@ -1041,7 +1039,6 @@ A variável `educ` é significativa apenas nos dois primeiros modelos, diferente
 ```{r q4.f}
 #| results: asis
 #| label: tbl-q4.f
-#| tbl-cap: Coeficientes com nearc4 como instrumento
 
 # pacote
 library(AER)
@@ -1093,7 +1090,8 @@ stargazer::stargazer(
   header = FALSE,
   font.size = "scriptsize",
   single.row = TRUE,
-  column.sep.width = "1pt"
+  column.sep.width = "1pt",
+  title = "IV"
 )
 ```
 
@@ -1115,8 +1113,6 @@ O coeficiente de `nearc4` é significativo, indicando que a proximidade de uma f
 
 ```{r q4.h}
 #| results: asis
-#| label: tbl-q4.h
-#| tbl-cap: Regressão de IQ contra nearc4
 
 # modelo
 m_iq <- lm(IQ ~ nearc4, data = dados)
@@ -1124,7 +1120,8 @@ m_iq <- lm(IQ ~ nearc4, data = dados)
 # sumário
 stargazer::stargazer(
   m_iq,
-  header = FALSE
+  header = FALSE,
+  title = "Regressão de IQ contra nearc4"
 )
 ```
 
@@ -1138,8 +1135,6 @@ A inclusão das variáveis regionais torna `nearc4` não significativo, indicand
 
 ```{r q4.i}
 #| results: asis
-#| label: tbl-q4.i
-#| tbl-cap: Regressão de IQ contra nearc4 com variáveis regionais
 
 # modelo
 m_iq_regional <- lm(IQ ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 +
@@ -1149,7 +1144,8 @@ m_iq_regional <- lm(IQ ~ nearc4 + reg661 + reg662 + reg663 + reg664 + reg665 +
 stargazer::stargazer(
   m_iq_regional,
   header = FALSE,
-  single.row = TRUE
+  single.row = TRUE,
+  title = "Regressão de IQ contra nearc4 e variáveis regionais"
 )
 ```
 
@@ -1202,9 +1198,11 @@ Agora vamos reproduzir o resultado principal de Dell. Dadas as variáveis de lon
 
 Obs.: Não há variável chamada `mean_slope` no banco de dados. Vou assumir que a variável correta é `slope`. Também não há `fe4_1`, vou supor que é `bfe4_1`.
 
-Na @tbl-q5.b, vemos que os coeficientes de `pothuan_mita` são significativos (5% significância) para os modelos 1 e 3, indicando que a participação na Mita aumenta o consumo das famílias. O coeficiente de `pothuan_mita` é maior
+Na @tbl-q5.b, vemos que os coeficientes de `pothuan_mita` são significativos (5% significância) para os modelos 1 e 3, indicando que a participação na Mita reduz o consumo das famílias, resultado esse consistente com Dell (2010).
 
 ```{r q5.b}
+#| results: asis
+
 # criar termos polinomiais
 dados <- dados |>
   transform(
@@ -1235,11 +1233,6 @@ m50 <- regressao(50)
 robust_se_m100 <- sqrt(diag(sandwich::vcovHC(m100, type = "HC1", cluster = ~district)))
 robust_se_m75 <- sqrt(diag(sandwich::vcovHC(m75, type = "HC1", cluster = ~district)))
 robust_se_m50 <- sqrt(diag(sandwich::vcovHC(m50, type = "HC1", cluster = ~district)))
-```
-
-```{r q5.b-sumario}
-#| results: asis
-#| label: tbl-q5.b
 
 # sumário
 stargazer::stargazer(
@@ -1248,7 +1241,8 @@ stargazer::stargazer(
   header = FALSE,
   single.row = TRUE,
   font.size = "scriptsize",
-  title = "Regressões com termos polinomiais"
+  title = "Regressões com termos polinomiais",
+  label = "tbl-q5.b"
 )
 ```
 
@@ -1256,9 +1250,11 @@ stargazer::stargazer(
 
 Execute as mesmas regressões de antes, mas, em vez de termos polinomiais em longitude e latitude, utilize um polinômio cúbico na distância até Potosí (dpot). Ou seja, inclua a primeira, a segunda e a terceira potência dessa variável nas regressões. Novamente, agrupe os erros padrão por distrito e execute a regressão de 3 maneiras: primeiro, para observações em que a distância até a fronteira da Mita (d_bnd) seja menor que 100 km; depois, quando for menor que 75 km; e, por último, quando for menor que 50 km. Reporte os resultados em uma única tabela e comente sobre os efeitos encontrados, considerando um nível de significância de 5%.
 
-Na @tbl-q5.c, vemos que os coeficientes de `dpot` são significativos (5% significância) para os modelos 1 e 3, indicando que a distância até Potosí afeta o consumo das famílias. O coeficiente de `dpot` é maior para o modelo 3, indicando que o efeito da distância é maior para distâncias menores.
+Na @tbl-q5.c, vemos que controlando por distância até Potosí, os coeficientes de `pothuan_mita` são significativos (5% significância) para todos os modelos, também consistente com os resultados de Dell (2010).
 
 ```{r q5.c}
+#| results: asis
+
 # criar termos polinomiais de dpot
 dados <- dados |>
   transform(
@@ -1284,12 +1280,6 @@ m50_dpot <- regressao_dpot(50)
 robust_se_m100_dpot <- sqrt(diag(sandwich::vcovHC(m100_dpot, type = "HC1", cluster = ~district)))
 robust_se_m75_dpot <- sqrt(diag(sandwich::vcovHC(m75_dpot, type = "HC1", cluster = ~district)))
 robust_se_m50_dpot <- sqrt(diag(sandwich::vcovHC(m50_dpot, type = "HC1", cluster = ~district)))
-```
-
-```{r q5.c.sumario}
-#| results: asis
-#| label: tbl-q5.c
-#| tbl-cap: "Regressões com polinômio cúbico na distância até Potosí"
 
 # sumário
 stargazer::stargazer(
@@ -1297,6 +1287,8 @@ stargazer::stargazer(
   se = list(robust_se_m100_dpot, robust_se_m75_dpot, robust_se_m50_dpot),
   header = FALSE,
   single.row = TRUE,
-  font.size = "scriptsize"
+  font.size = "scriptsize",
+  title = "Regressões com polinômio cúbico de dpot",
+  label = "tbl-q5.c"
 )
 ```
